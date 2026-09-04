@@ -2,15 +2,15 @@
 using System.Buffers.Binary;
 using System.IO;
 
-namespace RfpProxy.AaMiDe
+namespace RfpProxy.AaMiDe.AaMiDe
 {
     public sealed class HeartbeatMessage : AaMiDeMessage
     {
-        private const long NanosecondsPerTick = (1000000 / TimeSpan.TicksPerMillisecond);
+        private const long NanosecondsPerTick = 1000000 / TimeSpan.TicksPerMillisecond;
 
         public TimeSpan Uptime { get; }
 
-        protected override ReadOnlyMemory<byte> Raw => base.Raw.Slice(8);
+        protected override ReadOnlyMemory<byte> Raw => base.Raw[8..];
 
         public override ushort Length => (ushort) (base.Length + 8);
 
@@ -18,7 +18,7 @@ namespace RfpProxy.AaMiDe
         {
             var span = base.Raw.Span;
             var mseconds = BinaryPrimitives.ReadUInt32LittleEndian(span);
-            var nseconds = BinaryPrimitives.ReadUInt32LittleEndian(span.Slice(4));
+            var nseconds = BinaryPrimitives.ReadUInt32LittleEndian(span[4..]);
             Uptime = TimeSpan.FromMilliseconds(mseconds).Add(TimeSpan.FromTicks(nseconds/NanosecondsPerTick));
         }
 
@@ -33,8 +33,8 @@ namespace RfpProxy.AaMiDe
             var mseconds = (uint) Uptime.TotalMilliseconds;
             var nseconds = Uptime.Add(TimeSpan.FromMilliseconds(-mseconds)).Ticks * NanosecondsPerTick;
             BinaryPrimitives.WriteUInt32LittleEndian(data, mseconds);
-            BinaryPrimitives.WriteUInt32LittleEndian(data.Slice(4), (uint) nseconds);
-            return data.Slice(8);
+            BinaryPrimitives.WriteUInt32LittleEndian(data[4..], (uint) nseconds);
+            return data[8..];
         }
 
         public override void Log(TextWriter writer)

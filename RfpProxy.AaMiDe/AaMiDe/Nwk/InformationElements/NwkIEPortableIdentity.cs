@@ -3,7 +3,7 @@ using System.Buffers.Binary;
 using System.IO;
 using RfpProxyLib;
 
-namespace RfpProxy.AaMiDe.Nwk.InformationElements
+namespace RfpProxy.AaMiDe.AaMiDe.Nwk.InformationElements
 {
     public sealed class NwkIePortableIdentity : NwkVariableLengthInformationElement
     {
@@ -31,13 +31,13 @@ namespace RfpProxy.AaMiDe.Nwk.InformationElements
                 {
                     case IPUITypeCoding.O:
                         var pun = span[0] & 0xfUL;
-                        span = span.Slice(1);
+                        span = span[1..];
                         length -= 8;
                         while (length > 0)
                         {
                             pun <<= 8;
                             pun = pun | span[0];
-                            span = span.Slice(1);
+                            span = span[1..];
                             length -= 8;
                         }
                         Number = pun >> (0 - length);
@@ -46,7 +46,7 @@ namespace RfpProxy.AaMiDe.Nwk.InformationElements
                         if (length != 40)
                             throw new ArgumentOutOfRangeException(nameof(length));
                         EMC = (ushort) ((span[0] & 0xf) << 12 | (span[1] << 4) | (span[2] >> 4));
-                        PSN = BinaryPrimitives.ReadUInt16BigEndian(span.Slice(3)) | ((span[2] & 0xfu)<<16);
+                        PSN = BinaryPrimitives.ReadUInt16BigEndian(span[3..]) | ((span[2] & 0xfu)<<16);
                         int checksum = 0;
                         var number = EMC * 10000000L + PSN;
                         var position = 10000_0000000L;
@@ -74,7 +74,7 @@ namespace RfpProxy.AaMiDe.Nwk.InformationElements
                     case IPUITypeCoding.N:
                         return $"{EMC:D5} {PSN:D7} {(C==10?"*":C.ToString())}";
                     default:
-                        return (Raw.Span[0]&0xf).ToString("x1") +  Raw.ToHex().Substring(1);
+                        return (Raw.Span[0]&0xf).ToString("x1") +  Raw.ToHex()[1..];
                 }
             }
         }
@@ -126,14 +126,14 @@ namespace RfpProxy.AaMiDe.Nwk.InformationElements
             {
                 case PortableIdentityType.IPEI:
                 case PortableIdentityType.IPUI:
-                    Ipui = new IPUI(data.Slice(2), bitCount);
+                    Ipui = new IPUI(data[2..], bitCount);
                     Raw = Ipui.Raw;
                     HasUnknown = Ipui.HasUnknown;
                     break;
                 case PortableIdentityType.TPUI:
                     TPUIType = (TPUITypeCoding) (span[2] >> 4);
                     HasUnknown = (span[1] & 0x7f) != 20;
-                    Identity = data.Slice(2);
+                    Identity = data[2..];
                     Raw = ReadOnlyMemory<byte>.Empty;
                     break;
                 default:
@@ -151,7 +151,7 @@ namespace RfpProxy.AaMiDe.Nwk.InformationElements
                     writer.Write($" IPUI-{Ipui.Put:G}({Ipui})");
                     break;
                 case PortableIdentityType.TPUI:
-                    writer.Write($" TPUI-{TPUIType:G}({Identity.ToHex().Substring(1)})");
+                    writer.Write($" TPUI-{TPUIType:G}({Identity.ToHex()[1..]})");
                     break;
                 case PortableIdentityType.IPEI:
                     writer.Write($" IPEI({Ipui})");

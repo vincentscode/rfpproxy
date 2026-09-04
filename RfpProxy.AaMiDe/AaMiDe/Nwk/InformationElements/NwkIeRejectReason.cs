@@ -1,7 +1,7 @@
 ﻿using System;
 using System.IO;
 
-namespace RfpProxy.AaMiDe.Nwk.InformationElements
+namespace RfpProxy.AaMiDe.AaMiDe.Nwk.InformationElements
 {
     public sealed class NwkIeRejectReason : NwkVariableLengthInformationElement
     {
@@ -42,7 +42,7 @@ namespace RfpProxy.AaMiDe.Nwk.InformationElements
 
         public Reason RejectReason { get; }
 
-        public override ReadOnlyMemory<byte> Raw => base.Raw.Slice(1);
+        public override ReadOnlyMemory<byte> Raw => base.Raw[1..];
 
         public NwkIeRejectReason(ReadOnlyMemory<byte> data):base(NwkVariableLengthElementType.RejectReason, data)
         {

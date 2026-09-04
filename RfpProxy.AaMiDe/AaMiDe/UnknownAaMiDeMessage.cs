@@ -2,7 +2,7 @@
 using System.IO;
 using RfpProxyLib;
 
-namespace RfpProxy.AaMiDe
+namespace RfpProxy.AaMiDe.AaMiDe
 {
     public sealed class UnknownAaMiDeMessage:AaMiDeMessage
     {

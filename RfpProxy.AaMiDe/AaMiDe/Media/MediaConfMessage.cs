@@ -4,7 +4,7 @@ using System.IO;
 using System.Net;
 using RfpProxyLib;
 
-namespace RfpProxy.AaMiDe.Media
+namespace RfpProxy.AaMiDe.AaMiDe.Media
 {
     public sealed class MediaConfMessage : MediaMessage
     {
@@ -65,7 +65,7 @@ namespace RfpProxy.AaMiDe.Media
 
         public override bool HasUnknown => true;
 
-        protected override ReadOnlyMemory<byte> Raw => base.Raw.Slice(86);
+        protected override ReadOnlyMemory<byte> Raw => base.Raw[86..];
 
         public ushort Reserved1 { get; }
 
@@ -85,30 +85,30 @@ namespace RfpProxy.AaMiDe.Media
             Vad = span[3] != 0;
             NumCodecs = span[4];
             Codecs = new Codec[NumCodecs];
-            var codecs = span.Slice(5);
+            var codecs = span[5..];
             for (int i = 0; i < NumCodecs; i++)
             {
-                Codecs[i] = new Codec(codecs.Slice(0, 3));
-                codecs = codecs.Slice(3);
+                Codecs[i] = new Codec(codecs[..3]);
+                codecs = codecs[3..];
             }
-            Reserved2 = base.Raw.Slice(0, 56).Slice(5).Slice(NumCodecs * 3);//additional codecs?
+            Reserved2 = base.Raw[..56][5..][(NumCodecs * 3)..];//additional codecs?
 
             MCEI = span[56];
             Reserved3 = span[57];
 
-            PPN = BinaryPrimitives.ReadUInt16LittleEndian(span.Slice(58));
+            PPN = BinaryPrimitives.ReadUInt16LittleEndian(span[58..]);
             Reserved4 = base.Raw.Slice(60, 4);
 
-            LocalPort1 = BinaryPrimitives.ReadUInt16BigEndian(span.Slice(64));
-            LocalPort2 = BinaryPrimitives.ReadUInt16BigEndian(span.Slice(66));
+            LocalPort1 = BinaryPrimitives.ReadUInt16BigEndian(span[64..]);
+            LocalPort2 = BinaryPrimitives.ReadUInt16BigEndian(span[66..]);
             Reserved5 = base.Raw.Slice(68, 2);
 
             RxIpAddress = new IPAddress(span.Slice(70,4));
-            RxPort1 = BinaryPrimitives.ReadUInt16BigEndian(span.Slice(74));
-            RxPort2 = BinaryPrimitives.ReadUInt16BigEndian(span.Slice(76));
+            RxPort1 = BinaryPrimitives.ReadUInt16BigEndian(span[74..]);
+            RxPort2 = BinaryPrimitives.ReadUInt16BigEndian(span[76..]);
             TxIpAddress = new IPAddress(span.Slice(78,4));
-            TxPort1 = BinaryPrimitives.ReadUInt16BigEndian(span.Slice(82));
-            TxPort2 = BinaryPrimitives.ReadUInt16BigEndian(span.Slice(84));
+            TxPort1 = BinaryPrimitives.ReadUInt16BigEndian(span[82..]);
+            TxPort2 = BinaryPrimitives.ReadUInt16BigEndian(span[84..]);
             //SRTP?
         }
 

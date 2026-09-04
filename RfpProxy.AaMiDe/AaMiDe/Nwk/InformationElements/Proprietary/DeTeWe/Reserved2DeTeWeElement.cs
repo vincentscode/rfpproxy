@@ -1,9 +1,9 @@
-﻿using RfpProxy.AaMiDe.Nwk.InformationElements.Proprietary.DeTeWe.Reserved2;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using RfpProxy.AaMiDe.AaMiDe.Nwk.InformationElements.Proprietary.DeTeWe.Reserved2;
 
-namespace RfpProxy.AaMiDe.Nwk.InformationElements.Proprietary.DeTeWe
+namespace RfpProxy.AaMiDe.AaMiDe.Nwk.InformationElements.Proprietary.DeTeWe
 {
     public class Reserved2DeTeWeElement : DeTeWeElement
     {
@@ -18,15 +18,15 @@ namespace RfpProxy.AaMiDe.Nwk.InformationElements.Proprietary.DeTeWe
         public Reserved2DeTeWeElement(ReadOnlyMemory<byte> data):base(DeTeWeType.Reserved2, data)
         {
             Reserved2Type = data.Span[0];
-            data = data.Slice(1);
+            data = data[1..];
             while (data.Length > 0)
             {
                 var type = (Reserved2ContentDeTeWeType)data.Span[0];
                 var length = data.Span[1];
-                data = data.Slice(2);
-                var content = Reserved2DeTeWeContent.Create(type, data.Slice(0,length));
+                data = data[2..];
+                var content = Reserved2DeTeWeContent.Create(type, data[..length]);
                 Elements.Add(content);
-                data = data.Slice(length);
+                data = data[length..];
                 HasUnknown |= content.HasUnknown;
             }
         }

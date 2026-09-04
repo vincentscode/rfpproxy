@@ -1,9 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
-using RfpProxy.AaMiDe.Nwk.InformationElements;
+using RfpProxy.AaMiDe.AaMiDe.Nwk.InformationElements;
 
-namespace RfpProxy.AaMiDe.Nwk
+namespace RfpProxy.AaMiDe.AaMiDe.Nwk
 {
     public abstract class NwkSFormatPayload : NwkPayload
     {

@@ -3,7 +3,7 @@ using System.Buffers.Binary;
 using System.IO;
 using RfpProxyLib;
 
-namespace RfpProxy.AaMiDe.Sys
+namespace RfpProxy.AaMiDe.AaMiDe.Sys
 {
     public sealed class SysLicenseTimerMessage : AaMiDeMessage
     {
@@ -14,7 +14,7 @@ namespace RfpProxy.AaMiDe.Sys
         /// </summary>
         public ReadOnlyMemory<byte> Md5 { get; }
 
-        protected override ReadOnlyMemory<byte> Raw => base.Raw.Slice(20);
+        protected override ReadOnlyMemory<byte> Raw => base.Raw[20..];
 
         public override ushort Length => (ushort) (base.Length + 20);
 
@@ -35,14 +35,14 @@ namespace RfpProxy.AaMiDe.Sys
         {
             data = base.Serialize(data);
             BinaryPrimitives.WriteUInt32BigEndian(data, (uint)GracePeriod.TotalMinutes);
-            Md5.Span.CopyTo(data.Slice(4));
-            return data.Slice(20);
+            Md5.Span.CopyTo(data[4..]);
+            return data[20..];
         }
 
         public override void Log(TextWriter writer)
         {
             base.Log(writer);
-            if (GracePeriod.TotalMinutes > Int32.MaxValue)
+            if (GracePeriod.TotalMinutes > int.MaxValue)
                 writer.Write($"Query ");
             else
                 writer.Write($"Grace Period({GracePeriod}) ");

@@ -1,7 +1,7 @@
 ﻿using System;
 using System.IO;
 
-namespace RfpProxy.AaMiDe.Rfpc
+namespace RfpProxy.AaMiDe.AaMiDe.Rfpc
 {
     public sealed class MacCapabilitiesRfpcValue : DnmRfpcValue
     {
@@ -37,7 +37,7 @@ namespace RfpProxy.AaMiDe.Rfpc
 
         public override bool HasUnknown => (int)Capabilities > 0xfffff;
 
-        public override ReadOnlyMemory<byte> Raw => base.Raw.Slice(3);
+        public override ReadOnlyMemory<byte> Raw => base.Raw[3..];
 
         public MacCapabilitiesRfpcValue(ReadOnlyMemory<byte> data):base(RfpcKey.MacCapabilities, data)
         {

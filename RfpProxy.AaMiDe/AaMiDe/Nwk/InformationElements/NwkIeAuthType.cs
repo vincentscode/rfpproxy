@@ -2,7 +2,7 @@
 using System.Buffers.Binary;
 using System.IO;
 
-namespace RfpProxy.AaMiDe.Nwk.InformationElements
+namespace RfpProxy.AaMiDe.AaMiDe.Nwk.InformationElements
 {
     public sealed class NwkIeAuthType : NwkVariableLengthInformationElement
     {
@@ -53,17 +53,17 @@ namespace RfpProxy.AaMiDe.Nwk.InformationElements
 
         public ushort? DefaultCipherKey { get; }
 
-        public override ReadOnlyMemory<byte> Raw => DefaultCipherKey.HasValue ? base.Raw.Slice(5) : base.Raw.Slice(3);
+        public override ReadOnlyMemory<byte> Raw => DefaultCipherKey.HasValue ? base.Raw[5..] : base.Raw[3..];
 
         public NwkIeAuthType(ReadOnlyMemory<byte> data) : base(NwkVariableLengthElementType.AuthType, data)
         {
             var span = data.Span;
             Algorithm = (AuthenticationAlgorithm) span[0];
-            span = span.Slice(1);
+            span = span[1..];
             if (Algorithm == AuthenticationAlgorithm.Proprietary)
             {
                 Proprietary = span[0];
-                span = span.Slice(1);
+                span = span[1..];
             }
             KeyType = (AuthenticationKeyType) (span[0] >> 4);
             KeyNumber = (byte) (span[0] & 0xf);
@@ -74,7 +74,7 @@ namespace RfpProxy.AaMiDe.Nwk.InformationElements
             CipherKeyNumber = (byte) (span[1] & 0xf);
             if (def)
             {
-                DefaultCipherKey = BinaryPrimitives.ReadUInt16BigEndian(span.Slice(2));
+                DefaultCipherKey = BinaryPrimitives.ReadUInt16BigEndian(span[2..]);
             }
         }
 

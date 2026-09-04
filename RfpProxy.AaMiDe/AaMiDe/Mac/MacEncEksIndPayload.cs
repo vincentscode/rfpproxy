@@ -1,9 +1,9 @@
-﻿using RfpProxy.AaMiDe.Dnm;
-using System;
+﻿using System;
 using System.Buffers.Binary;
 using System.IO;
+using RfpProxy.AaMiDe.AaMiDe.Dnm;
 
-namespace RfpProxy.AaMiDe.Mac
+namespace RfpProxy.AaMiDe.AaMiDe.Mac
 {
     public sealed class MacEncEksIndPayload : DnmPayload
     {
@@ -24,12 +24,12 @@ namespace RfpProxy.AaMiDe.Mac
         public MacEncEksIndPayload(ReadOnlyMemory<byte> data):base(data)
         {
             Flag = (MacEncEksIndFlag) data.Span[0];
-            Raw = base.Raw.Slice(1);
+            Raw = base.Raw[1..];
             if (Flag == MacEncEksIndFlag.EncrytpedWithId)
             {
                 Id = Raw.Span[0];
-                Ppn = BinaryPrimitives.ReadUInt16BigEndian(Raw.Span.Slice(1));
-                Raw = Raw.Slice(3);
+                Ppn = BinaryPrimitives.ReadUInt16BigEndian(Raw.Span[1..]);
+                Raw = Raw[3..];
             }
         }
 

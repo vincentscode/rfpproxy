@@ -2,13 +2,13 @@
 using System.Buffers.Binary;
 using System.IO;
 
-namespace RfpProxy.AaMiDe.Sync
+namespace RfpProxy.AaMiDe.AaMiDe.Sync
 {
     public sealed class StartMacSlaveModeIndSyncMessage : SyncMessage
     {
         public ushort Rfp { get; }
 
-        protected override ReadOnlyMemory<byte> Raw => base.Raw.Slice(2);
+        protected override ReadOnlyMemory<byte> Raw => base.Raw[2..];
 
         public StartMacSlaveModeIndSyncMessage(ReadOnlyMemory<byte> data):base(SyncMessageType.StartMacSlaveModeInd, data)
         {

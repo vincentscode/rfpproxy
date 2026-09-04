@@ -1,7 +1,6 @@
-﻿using System;
-using System.IO;
+﻿using System.IO;
 
-namespace RfpProxy.AaMiDe.Nwk.InformationElements.Proprietary.Aastra
+namespace RfpProxy.AaMiDe.AaMiDe.Nwk.InformationElements.Proprietary.Aastra
 {
     public abstract class AastraElement
     {

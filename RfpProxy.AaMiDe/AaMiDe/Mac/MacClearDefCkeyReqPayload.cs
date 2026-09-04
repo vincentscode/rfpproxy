@@ -1,9 +1,9 @@
 using System;
 using System.Buffers.Binary;
 using System.IO;
-using RfpProxy.AaMiDe.Dnm;
+using RfpProxy.AaMiDe.AaMiDe.Dnm;
 
-namespace RfpProxy.AaMiDe.Mac
+namespace RfpProxy.AaMiDe.AaMiDe.Mac
 {
     public sealed class MacClearDefCkeyReqPayload : AaMiDeMessage
     {
@@ -13,14 +13,14 @@ namespace RfpProxy.AaMiDe.Mac
 
         public uint PMID { get; }
 
-        protected override ReadOnlyMemory<byte> Raw => base.Raw.Slice(5);
+        protected override ReadOnlyMemory<byte> Raw => base.Raw[5..];
         
         public MacClearDefCkeyReqPayload(ReadOnlyMemory<byte> data) : base(MsgType.DNM, data)
         {
             var span = base.Raw.Span;
             Layer = (DnmLayer) span[0];
             DnmType = (DnmType) span[1];
-            PMID = (uint)(((span[2] & 0xf) << 16) | BinaryPrimitives.ReadUInt16BigEndian(span.Slice(3)));
+            PMID = (uint)(((span[2] & 0xf) << 16) | BinaryPrimitives.ReadUInt16BigEndian(span[3..]));
         }
 
         public override void Log(TextWriter writer)

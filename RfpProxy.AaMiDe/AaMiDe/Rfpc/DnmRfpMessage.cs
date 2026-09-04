@@ -1,10 +1,10 @@
-﻿using RfpProxy.AaMiDe.Dnm;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using RfpProxy.AaMiDe.AaMiDe.Dnm;
 
-namespace RfpProxy.AaMiDe.Rfpc
+namespace RfpProxy.AaMiDe.AaMiDe.Rfpc
 {
     public enum DnmRfpcType : byte
     {
@@ -86,14 +86,14 @@ namespace RfpProxy.AaMiDe.Rfpc
             DnmType = (DnmRfpcType) span[1];
             Values = new List<DnmRfpcValue>();
 
-            var payload = base.Raw.Slice(2);
+            var payload = base.Raw[2..];
             while (payload.Length > 0)
             {
                 var key = (RfpcKey) payload.Span[0];
                 var length = payload.Span[1];
                 var value = payload.Slice(2, length);
                 Values.Add(DnmRfpcValue.Create(key, value));
-                payload = payload.Slice(2).Slice(length);
+                payload = payload[2..][length..];
             }
             Raw = payload;
         }

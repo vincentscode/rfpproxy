@@ -3,7 +3,7 @@ using System.Globalization;
 using System.IO;
 using RfpProxyLib;
 
-namespace RfpProxy.AaMiDe.Nwk.InformationElements.Proprietary.DeTeWe
+namespace RfpProxy.AaMiDe.AaMiDe.Nwk.InformationElements.Proprietary.DeTeWe
 {
     public class DateTimeDeTeWeElement : DeTeWeElement
     {
@@ -15,7 +15,7 @@ namespace RfpProxy.AaMiDe.Nwk.InformationElements.Proprietary.DeTeWe
 
         public override bool HasUnknown => Reserved1 != 0xc0 || Reserved2 != 0x00;
 
-        public override ReadOnlyMemory<byte> Raw => base.Raw.Slice(8);
+        public override ReadOnlyMemory<byte> Raw => base.Raw[8..];
 
         public DateTimeDeTeWeElement(ReadOnlyMemory<byte> data):base(DeTeWeType.DateTime, data)
         {

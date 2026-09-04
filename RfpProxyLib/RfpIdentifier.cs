@@ -3,9 +3,10 @@ using System.Buffers.Binary;
 
 namespace RfpProxyLib
 {
-    public readonly struct RfpIdentifier:IEquatable<RfpIdentifier>
+    public readonly struct RfpIdentifier : IEquatable<RfpIdentifier>
     {
-        public static readonly int Length = 6;
+        public const int Length = 6;
+        
         private readonly ReadOnlyMemory<byte> _identifier;
 
         public RfpIdentifier(ReadOnlyMemory<byte> identifier)
@@ -20,7 +21,7 @@ namespace RfpProxyLib
             if (mask.Length != Length)
                 throw new ArgumentOutOfRangeException(nameof(mask), $"mask must be {Length} bytes");
 
-            for (int i = 0; i < _identifier.Length; i++)
+            for (var i = 0; i < _identifier.Length; i++)
             {
                 var masked = _identifier.Span[i] & mask[i];
                 if (masked != other._identifier.Span[i])
@@ -38,8 +39,8 @@ namespace RfpProxyLib
 
         public bool Equals(RfpIdentifier other)
         {
-            return _identifier.Length == other._identifier.Length &&
-                   _identifier.Span.SequenceEqual(other._identifier.Span);
+            return _identifier.Length == other._identifier.Length
+                   && _identifier.Span.SequenceEqual(other._identifier.Span);
         }
 
         public override bool Equals(object obj)
@@ -51,7 +52,7 @@ namespace RfpProxyLib
         public override int GetHashCode()
         {
             var first = BinaryPrimitives.ReadInt32BigEndian(_identifier.Span);
-            var second = BinaryPrimitives.ReadInt32BigEndian(_identifier.Span.Slice(2));
+            var second = BinaryPrimitives.ReadInt32BigEndian(_identifier.Span[2..]);
             return first ^ second;
         }
 

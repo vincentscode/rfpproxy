@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace RfpProxy.AaMiDe.Nwk
+namespace RfpProxy.AaMiDe.AaMiDe.Nwk
 {
     public abstract class NwkCLMSPayload : NwkPayload
     {
@@ -24,7 +24,7 @@ namespace RfpProxy.AaMiDe.Nwk
                 }
                 else
                 {
-                    return new NwkCLMSFixedDataPlayload(ti, f, data.Slice(1));
+                    return new NwkCLMSFixedDataPlayload(ti, f, data[1..]);
                 }
             }
         }

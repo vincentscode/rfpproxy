@@ -1,4 +1,4 @@
-﻿namespace RfpProxy.AaMiDe.Nwk.InformationElements.Proprietary.DeTeWe
+﻿namespace RfpProxy.AaMiDe.AaMiDe.Nwk.InformationElements.Proprietary.DeTeWe
 {
     public enum DeTeWeType:byte
     {

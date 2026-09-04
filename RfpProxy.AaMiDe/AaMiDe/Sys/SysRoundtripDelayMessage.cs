@@ -2,7 +2,7 @@
 using System.Buffers.Binary;
 using System.IO;
 
-namespace RfpProxy.AaMiDe.Sys
+namespace RfpProxy.AaMiDe.AaMiDe.Sys
 {
     public sealed class SysRoundtripDelayMessage : AaMiDeMessage
     {
@@ -12,18 +12,18 @@ namespace RfpProxy.AaMiDe.Sys
 
         public DateTimeOffset Time2 { get; }
 
-        protected override ReadOnlyMemory<byte> Raw => base.Raw.Slice(16);
+        protected override ReadOnlyMemory<byte> Raw => base.Raw[16..];
 
         public SysRoundtripDelayMessage(ReadOnlyMemory<byte> data):base(MsgType.SYS_VSNTP_TIME, data)
         {
             var span = base.Raw.Span;
             
             var seconds = BinaryPrimitives.ReadUInt32BigEndian(span);
-            var nseconds = BinaryPrimitives.ReadUInt32BigEndian(span.Slice(4));
+            var nseconds = BinaryPrimitives.ReadUInt32BigEndian(span[4..]);
             Time1 = Epoch.AddSeconds(seconds).AddTicks(nseconds /(1000000 / TimeSpan.TicksPerMillisecond));
 
-            seconds = BinaryPrimitives.ReadUInt32BigEndian(span.Slice(8));
-            nseconds = BinaryPrimitives.ReadUInt32BigEndian(span.Slice(12));
+            seconds = BinaryPrimitives.ReadUInt32BigEndian(span[8..]);
+            nseconds = BinaryPrimitives.ReadUInt32BigEndian(span[12..]);
             Time2 = Epoch.AddSeconds(seconds).AddTicks(nseconds /(1000000 / TimeSpan.TicksPerMillisecond));
         }
 

@@ -9,19 +9,30 @@ using RfpProxyLib.Messages;
 
 namespace RfpProxyLib
 {
-    public abstract class ProxyClient:IDisposable
+    public abstract class ProxyClient : IDisposable
     {
         private readonly Socket _socket;
         private readonly string _socketPath;
         private readonly SemaphoreSlim _readLock = new SemaphoreSlim(1, 1);
         private readonly SemaphoreSlim _writeLock = new SemaphoreSlim(1, 1);
 
-        public ProxyClient(string socket)
+        protected ProxyClient(string socket)
         {
             _socket = new Socket(AddressFamily.Unix, SocketType.Stream, ProtocolType.IP);
             _socketPath = socket;
         }
 
+        /// <summary>
+        /// Adds a subscription using the given masked filters, which listens to messages.
+        /// Listening to messages means getting a copy of each message, but not intercepting it.
+        /// No action has to be performed in these handlers, messages will always be forwarded.
+        /// These handlers can still inject additional messages using <see cref="WriteAsync" />.
+        /// </summary>
+        /// <param name="mac">The MAC filter.</param>
+        /// <param name="macMask">The mask to apply the MAC filter with.</param>
+        /// <param name="filter">The message filter.</param>
+        /// <param name="filterMask">The mask to apply the message filter with.</param>
+        /// <param name="cancellationToken">A <see cref="CancellationToken" /> that can be used to end the subscription.</param>
         public Task AddListenAsync(string mac, string macMask, string filter, string filterMask, CancellationToken cancellationToken)
         {
             var subscription = new Subscribe
@@ -31,7 +42,17 @@ namespace RfpProxyLib
             return AddSubscriptionAsync(subscription, mac, macMask, filter, filterMask, cancellationToken);
         }
 
-        /// <param name="priority">subscriptions are processed in ascending priority</param>
+        /// <summary>
+        /// Adds a subscription using the given masked filters, which handles messages.
+        /// Handling messages means intercepting each message and deciding if and how it is forwarded.
+        /// Each message must be manually forwarded using <see cref="WriteAsync" />.
+        /// </summary>
+        /// <param name="priority">The priority of the subscription. Subscriptions are processed in <b>ascending</b> priority.</param>
+        /// <param name="mac">The MAC filter.</param>
+        /// <param name="macMask">The mask to apply the MAC filter with.</param>
+        /// <param name="filter">The message filter.</param>
+        /// <param name="filterMask">The mask to apply the message filter with.</param>
+        /// <param name="cancellationToken">A <see cref="CancellationToken" /> that can be used to end the subscription.</param>
         public Task AddHandlerAsync(byte priority, string mac, string macMask, string filter, string filterMask, CancellationToken cancellationToken)
         {
             var subscription = new Subscribe
@@ -57,20 +78,19 @@ namespace RfpProxyLib
                 if (_finished)
                     return;
                 _finished = true;
-                using (var stream = new NetworkStream(_socket, false))
-                using (var writer = new StreamWriter(stream))
-                using (var reader = new StreamReader(stream))
-                {
-                    var msg = JsonConvert.SerializeObject(eos);
-                    await writer.WriteLineAsync(msg).ConfigureAwait(false);
-                    LogWritten(msg);
-                    cancellationToken.ThrowIfCancellationRequested();
-                    await writer.FlushAsync().ConfigureAwait(false);
-                    cancellationToken.ThrowIfCancellationRequested();
-                    msg = await reader.ReadLineAsync().ConfigureAwait(false);
-                    LogRead(msg);
-                    cancellationToken.ThrowIfCancellationRequested();
-                }
+                await using var stream = new NetworkStream(_socket, false);
+                await using var writer = new StreamWriter(stream);
+                using var reader = new StreamReader(stream);
+                
+                var msg = JsonConvert.SerializeObject(eos);
+                await writer.WriteLineAsync(msg).ConfigureAwait(false);
+                LogWritten(msg);
+                cancellationToken.ThrowIfCancellationRequested();
+                await writer.FlushAsync().ConfigureAwait(false);
+                cancellationToken.ThrowIfCancellationRequested();
+                msg = await reader.ReadLineAsync().ConfigureAwait(false);
+                LogRead(msg);
+                cancellationToken.ThrowIfCancellationRequested();
             }
             finally
             {
@@ -126,7 +146,7 @@ namespace RfpProxyLib
             var direction = (MessageDirection) message[0];
             var messageId = BinaryPrimitives.ReadUInt32BigEndian(message.AsSpan(1));
             var rfp = new RfpIdentifier(message.AsMemory(5, 6));
-            return OnMessageAsync(direction, messageId, rfp, message.AsMemory(5).Slice(RfpIdentifier.Length), cancellationToken);
+            return OnMessageAsync(direction, messageId, rfp, message.AsMemory(5)[RfpIdentifier.Length..], cancellationToken);
         }
 
         protected abstract Task OnMessageAsync(MessageDirection direction, uint messageId, RfpIdentifier rfp, Memory<byte> data, CancellationToken cancellationToken);
@@ -137,13 +157,13 @@ namespace RfpProxyLib
             {
                 var bytesRead = await socket.ReceiveAsync(buffer, SocketFlags.None, cancellationToken).ConfigureAwait(false);
                 if (bytesRead == 0) return false;
-                buffer = buffer.Slice(bytesRead);
+                buffer = buffer[bytesRead..];
             }
             return true;
         }
 
-        private bool _initialized = false;
-        private bool _finished = false;
+        private bool _initialized;
+        private bool _finished;
 
         private async Task InitAsync(CancellationToken cancellationToken)
         {
@@ -160,13 +180,12 @@ namespace RfpProxyLib
                 await _writeLock.WaitAsync(cancellationToken).ConfigureAwait(false);
                 try
                 {
-                    using (var stream = new NetworkStream(_socket, false))
-                    using (var reader = new StreamReader(stream))
-                    {
-                        var init = await reader.ReadLineAsync().ConfigureAwait(false);
-                        cancellationToken.ThrowIfCancellationRequested();
-                        LogRead(init);
-                    }
+                    await using var stream = new NetworkStream(_socket, false);
+                    using var reader = new StreamReader(stream);
+                    
+                    var init = await reader.ReadLineAsync().ConfigureAwait(false);
+                    cancellationToken.ThrowIfCancellationRequested();
+                    LogRead(init);
                 }
                 finally
                 {
@@ -184,37 +203,33 @@ namespace RfpProxyLib
         {
             subscription.Rfp = new SubscriptionFilter
             {
-                Filter = mac.Replace(" ", String.Empty),
-                Mask = macMask.Replace(" ", String.Empty)
+                Filter = mac.Replace(" ", string.Empty),
+                Mask = macMask.Replace(" ", string.Empty)
             };
             subscription.Message = new SubscriptionFilter
             {
-                Filter = filter.Replace(" ", String.Empty),
-                Mask = filterMask.Replace(" ", String.Empty)
+                Filter = filter.Replace(" ", string.Empty),
+                Mask = filterMask.Replace(" ", string.Empty)
             };
             await InitAsync(cancellationToken).ConfigureAwait(false);
             var msg = JsonConvert.SerializeObject(subscription);
-            using (var stream = new NetworkStream(_socket, false))
-            using (var writer = new StreamWriter(stream))
-            {
-                await writer.WriteLineAsync(msg).ConfigureAwait(false);
-                LogWritten(msg);
-                cancellationToken.ThrowIfCancellationRequested();
-                await writer.FlushAsync().ConfigureAwait(false);
-                cancellationToken.ThrowIfCancellationRequested();
-            }
+            await using var stream = new NetworkStream(_socket, false);
+            await using var writer = new StreamWriter(stream);
+            await writer.WriteLineAsync(msg).ConfigureAwait(false);
+            LogWritten(msg);
+            cancellationToken.ThrowIfCancellationRequested();
+            await writer.FlushAsync().ConfigureAwait(false);
+            cancellationToken.ThrowIfCancellationRequested();
         }
 
         public event EventHandler<LogEventArgs> Log;
 
         protected virtual void Dispose(bool disposing)
         {
-            if (disposing)
-            {
-                _socket.Dispose();
-                _readLock.Dispose();
-                _writeLock.Dispose();
-            }
+            if (!disposing) return;
+            _socket.Dispose();
+            _readLock.Dispose();
+            _writeLock.Dispose();
         }
 
         public void Dispose()

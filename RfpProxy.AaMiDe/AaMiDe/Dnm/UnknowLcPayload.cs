@@ -2,7 +2,7 @@
 using System.IO;
 using RfpProxyLib;
 
-namespace RfpProxy.AaMiDe.Dnm
+namespace RfpProxy.AaMiDe.AaMiDe.Dnm
 {
     public sealed class UnknowLcPayload : LcPayload
     {

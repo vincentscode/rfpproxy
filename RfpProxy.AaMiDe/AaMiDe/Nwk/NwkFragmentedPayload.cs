@@ -1,7 +1,7 @@
 ﻿using System;
 using System.IO;
 
-namespace RfpProxy.AaMiDe.Nwk
+namespace RfpProxy.AaMiDe.AaMiDe.Nwk
 {
     public class NwkFragmentedPayload : NwkPayload
     {

@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 
-namespace RfpProxy.AaMiDe.Nwk.InformationElements
+namespace RfpProxy.AaMiDe.AaMiDe.Nwk.InformationElements
 {
     public sealed class NwkIeCodecList : NwkVariableLengthInformationElement
     {
@@ -76,15 +76,15 @@ namespace RfpProxy.AaMiDe.Nwk.InformationElements
             var span = data.Span;
             Negotiation = (span[0] & 0x10)!= 0;
             Codecs = new List<Codec>();
-            span = span.Slice(1);
-            data = data.Slice(1);
+            span = span[1..];
+            data = data[1..];
             do
             {
                 Codecs.Add(new Codec(span));
-                data = data.Slice(3);
+                data = data[3..];
                 if (span[2] >= 128)
                     break;
-                span = span.Slice(3);
+                span = span[3..];
             } while (true);
             Raw = data;
         }

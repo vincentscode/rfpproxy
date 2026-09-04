@@ -248,7 +248,7 @@ namespace RfpProxy.AaMiDe
             foreach (var frag in fragments)
             {
                 frag.Data.CopyTo(slice);
-                slice = slice.Slice(frag.Data.Length);
+                slice = slice[frag.Data.Length..];
             }
             _fragments.Remove(lln);
             return result;

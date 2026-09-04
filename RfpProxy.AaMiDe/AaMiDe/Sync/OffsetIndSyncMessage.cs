@@ -2,7 +2,7 @@
 using System.Buffers.Binary;
 using System.IO;
 
-namespace RfpProxy.AaMiDe.Sync
+namespace RfpProxy.AaMiDe.AaMiDe.Sync
 {
     public sealed class OffsetIndSyncMessage : SyncMessage
     {
@@ -10,7 +10,7 @@ namespace RfpProxy.AaMiDe.Sync
 
         public OffsetInd[] RFPs { get; }
 
-        protected override ReadOnlyMemory<byte> Raw => base.Raw.Slice(1 + RFPs.Length * 6);
+        protected override ReadOnlyMemory<byte> Raw => base.Raw[(1 + RFPs.Length * 6)..];
 
         public override bool HasUnknown => false;
 
@@ -19,15 +19,15 @@ namespace RfpProxy.AaMiDe.Sync
             var span = base.Raw.Span;
             var count = span[0];
             RFPs = new OffsetInd[count];
-            span = span.Slice(1);
+            span = span[1..];
             for (int i = 0; i < RFPs.Length; i++)
             {
-                var rpn = BinaryPrimitives.ReadUInt16BigEndian(span.Slice(0));
-                var offset = BinaryPrimitives.ReadInt16BigEndian(span.Slice(2));
+                var rpn = BinaryPrimitives.ReadUInt16BigEndian(span[..]);
+                var offset = BinaryPrimitives.ReadInt16BigEndian(span[2..]);
                 var rssi = span[4];
                 var qtSyncCheck = span[5];
                 RFPs[i] = new OffsetInd(rpn, offset, rssi, qtSyncCheck);
-                span = span.Slice(6);
+                span = span[6..];
             }
         }
 

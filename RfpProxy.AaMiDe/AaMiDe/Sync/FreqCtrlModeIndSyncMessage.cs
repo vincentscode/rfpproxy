@@ -1,7 +1,7 @@
 ﻿using System;
 using System.IO;
 
-namespace RfpProxy.AaMiDe.Sync
+namespace RfpProxy.AaMiDe.AaMiDe.Sync
 {
     public sealed class FreqCtrlModeIndSyncMessage : SyncMessage
     {
@@ -9,7 +9,7 @@ namespace RfpProxy.AaMiDe.Sync
 
         public override bool HasUnknown => true;
 
-        protected override ReadOnlyMemory<byte> Raw => base.Raw.Slice(1);
+        protected override ReadOnlyMemory<byte> Raw => base.Raw[1..];
 
         public FreqCtrlModeIndSyncMessage(ReadOnlyMemory<byte> data):base(SyncMessageType.SystemSearchInd, data)
         {

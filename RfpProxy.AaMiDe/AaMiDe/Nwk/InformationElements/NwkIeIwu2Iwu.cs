@@ -1,10 +1,10 @@
 ﻿using System;
 using System.Buffers.Binary;
 using System.IO;
-using RfpProxy.AaMiDe.Nwk.InformationElements.Proprietary;
+using RfpProxy.AaMiDe.AaMiDe.Nwk.InformationElements.Proprietary;
 using RfpProxyLib;
 
-namespace RfpProxy.AaMiDe.Nwk.InformationElements
+namespace RfpProxy.AaMiDe.AaMiDe.Nwk.InformationElements
 {
     public sealed class NwkIeIwu2Iwu : NwkVariableLengthInformationElement
     {
@@ -72,18 +72,18 @@ namespace RfpProxy.AaMiDe.Nwk.InformationElements
                 Discriminator = (DiscriminatorType) span[1];
                 if (Discriminator == DiscriminatorType.EMC)
                 {
-                    EMC = BinaryPrimitives.ReadUInt16BigEndian(data.Span.Slice(2));
+                    EMC = BinaryPrimitives.ReadUInt16BigEndian(data.Span[2..]);
                     Raw = ReadOnlyMemory<byte>.Empty;
-                    Content = NwkIeProprietaryContent.Create(EMC, data.Slice(4));
+                    Content = NwkIeProprietaryContent.Create(EMC, data[4..]);
                 }
                 else
                 {
-                    Raw = data.Slice(2);
+                    Raw = data[2..];
                 }
             }
             else
             {
-                Raw = data.Slice(1);
+                Raw = data[1..];
             }
         }
 

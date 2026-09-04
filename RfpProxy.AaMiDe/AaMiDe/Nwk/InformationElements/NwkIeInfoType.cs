@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 
-namespace RfpProxy.AaMiDe.Nwk.InformationElements
+namespace RfpProxy.AaMiDe.AaMiDe.Nwk.InformationElements
 {
     public sealed class NwkIeInfoType : NwkVariableLengthInformationElement
     {
@@ -50,18 +50,18 @@ namespace RfpProxy.AaMiDe.Nwk.InformationElements
                 InfoTypes.Add((ParameterType)(span[0] & 0x7f));
                 if (span[0] >= 128)
                 {
-                    Raw = data.Slice(1);
+                    Raw = data[1..];
                     break;
                 }
-                span = span.Slice(1);
-                data = data.Slice(1);
+                span = span[1..];
+                data = data[1..];
             };
         }
 
         public override void Log(TextWriter writer)
         {
             base.Log(writer);
-            writer.Write($" InfoType({String.Join(", ", InfoTypes)})");
+            writer.Write($" InfoType({string.Join(", ", InfoTypes)})");
         }
     }
 }

@@ -2,7 +2,7 @@
 using System.Buffers.Binary;
 using System.IO;
 
-namespace RfpProxy.AaMiDe
+namespace RfpProxy.AaMiDe.AaMiDe
 {
     public sealed class AckMessage : AaMiDeMessage
     {
@@ -10,13 +10,13 @@ namespace RfpProxy.AaMiDe
 
         public ushort CallId { get; }
 
-        protected override ReadOnlyMemory<byte> Raw => base.Raw.Slice(4);
+        protected override ReadOnlyMemory<byte> Raw => base.Raw[4..];
         
         public AckMessage(ReadOnlyMemory<byte> data):base(MsgType.ACK, data)
         {
             var span = base.Raw.Span;
             Message = (MsgType) BinaryPrimitives.ReadUInt16BigEndian(span);
-            CallId = BinaryPrimitives.ReadUInt16LittleEndian(span.Slice(2));
+            CallId = BinaryPrimitives.ReadUInt16LittleEndian(span[2..]);
         }
 
         public override void Log(TextWriter writer)

@@ -9,26 +9,26 @@ namespace RfpProxyLib
         public static string CString(this ReadOnlySpan<byte> data)
         {
             var eos = data.IndexOf((byte) 0);
-            if (eos < 0)
-                return String.Empty;
-            return Encoding.UTF8.GetString(data.Slice(0, eos));
+            return eos < 0 ? string.Empty : Encoding.UTF8.GetString(data[..eos]);
         }
 
         public static bool IsEmpty(this Span<byte> data)
         {
-            for (int i = 0; i < data.Length; i++)
+            foreach (var b in data)
             {
-                if (data[i] != 0) return false;
+                if (b != 0x0) return false;
             }
+
             return true;
         }
 
         public static bool IsEmpty(this ReadOnlySpan<byte> data)
         {
-            for (int i = 0; i < data.Length; i++)
+            foreach (var b in data)
             {
-                if (data[i] != 0) return false;
+                if (b != 0x0) return false;
             }
+
             return true;
         }
 

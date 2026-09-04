@@ -1,7 +1,7 @@
 ﻿using System;
 using System.IO;
 
-namespace RfpProxy.AaMiDe.Sys
+namespace RfpProxy.AaMiDe.AaMiDe.Sys
 {
     public sealed class SysHeartbeatIntervalMessage : AaMiDeMessage
     {
@@ -10,7 +10,7 @@ namespace RfpProxy.AaMiDe.Sys
         /// <summary>
         /// Padding
         /// </summary>
-        protected override ReadOnlyMemory<byte> Raw => base.Raw.Slice(1);
+        protected override ReadOnlyMemory<byte> Raw => base.Raw[1..];
 
         public override bool HasUnknown => false;
 

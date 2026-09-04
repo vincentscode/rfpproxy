@@ -1,24 +1,23 @@
 ﻿using System;
-using RfpProxy.AaMiDe.Sys;
+using RfpProxy.AaMiDe.AaMiDe.Sys;
 
-namespace RfpProxy.Virtual
+namespace RfpProxy.Virtual;
+
+partial class VirtualRfp
 {
-    partial class VirtualRfp
-    {
-        private TimeSpan _licenseGracePeriod = TimeSpan.FromMinutes(UInt16.MaxValue);
+    private TimeSpan _licenseGracePeriod = TimeSpan.FromMinutes(ushort.MaxValue);
 
-        private void OnLicenseTimer(SysLicenseTimerMessage message)
+    private void OnLicenseTimer(SysLicenseTimerMessage message)
+    {
+        if (message.GracePeriod.TotalMinutes > int.MaxValue)
         {
-            if (message.GracePeriod.TotalMinutes > Int32.MaxValue)
-            {
-                //query
-                var licenseTimer = new SysLicenseTimerMessage(_licenseGracePeriod, message.Md5);
-                SendMessage(licenseTimer);
-            }
-            else
-            {
-                _licenseGracePeriod = message.GracePeriod;
-            }
+            //query
+            var licenseTimer = new SysLicenseTimerMessage(_licenseGracePeriod, message.Md5);
+            SendMessage(licenseTimer);
+        }
+        else
+        {
+            _licenseGracePeriod = message.GracePeriod;
         }
     }
 }

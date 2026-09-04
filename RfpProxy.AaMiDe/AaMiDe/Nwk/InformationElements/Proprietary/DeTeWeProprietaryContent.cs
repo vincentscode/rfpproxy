@@ -1,10 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
-using RfpProxy.AaMiDe.Nwk.InformationElements.Proprietary.DeTeWe;
+using RfpProxy.AaMiDe.AaMiDe.Nwk.InformationElements.Proprietary.DeTeWe;
 
-namespace RfpProxy.AaMiDe.Nwk.InformationElements.Proprietary
+namespace RfpProxy.AaMiDe.AaMiDe.Nwk.InformationElements.Proprietary
 {
     public class DeTeWeProprietaryContent:NwkIeProprietaryContent
     {
@@ -19,7 +18,7 @@ namespace RfpProxy.AaMiDe.Nwk.InformationElements.Proprietary
             {
                 var length = data.Span[1];
                 Elements.Add(DeTeWeElement.Create((DeTeWeType) data.Span[0], data.Slice(2,length)));
-                data = data.Slice(2).Slice(length);
+                data = data[2..][length..];
             }
         }
 

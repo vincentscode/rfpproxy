@@ -2,7 +2,7 @@
 using System.Buffers.Binary;
 using System.IO;
 
-namespace RfpProxy.AaMiDe.Sync
+namespace RfpProxy.AaMiDe.AaMiDe.Sync
 {
     public sealed class FreqCtrlModeCfmSyncMessage : SyncMessage
     {
@@ -14,14 +14,14 @@ namespace RfpProxy.AaMiDe.Sync
         
         public override bool HasUnknown => true;
 
-        protected override ReadOnlyMemory<byte> Raw => base.Raw.Slice(5);
+        protected override ReadOnlyMemory<byte> Raw => base.Raw[5..];
 
         public FreqCtrlModeCfmSyncMessage(ReadOnlyMemory<byte> data):base(SyncMessageType.FreqCtrlModeCfm, data)
         {
             var span = base.Raw.Span;
             Mode = span[0];
-            Ppm = BinaryPrimitives.ReadUInt16BigEndian(span.Slice(1));
-            Avg = BinaryPrimitives.ReadUInt16BigEndian(span.Slice(3));
+            Ppm = BinaryPrimitives.ReadUInt16BigEndian(span[1..]);
+            Avg = BinaryPrimitives.ReadUInt16BigEndian(span[3..]);
         }
 
         public override void Log(TextWriter writer)

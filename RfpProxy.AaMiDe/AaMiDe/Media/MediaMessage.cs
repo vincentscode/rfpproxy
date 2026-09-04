@@ -2,7 +2,7 @@
 using System.Buffers.Binary;
 using System.IO;
 
-namespace RfpProxy.AaMiDe.Media
+namespace RfpProxy.AaMiDe.AaMiDe.Media
 {
     public abstract class MediaMessage : AaMiDeMessage
     {
@@ -20,7 +20,7 @@ namespace RfpProxy.AaMiDe.Media
             Handle = BinaryPrimitives.ReadUInt16LittleEndian(base.Raw.Span);
         }
 
-        protected override ReadOnlyMemory<byte> Raw => base.Raw.Slice(2);
+        protected override ReadOnlyMemory<byte> Raw => base.Raw[2..];
 
         public override void Log(TextWriter writer)
         {
@@ -32,7 +32,7 @@ namespace RfpProxy.AaMiDe.Media
         {
             data = base.Serialize(data);
             BinaryPrimitives.WriteUInt16LittleEndian(data, Handle);
-            return data.Slice(2);
+            return data[2..];
         }
     }
 }

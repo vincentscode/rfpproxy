@@ -3,7 +3,7 @@ using System.Buffers.Binary;
 using System.IO;
 using RfpProxyLib;
 
-namespace RfpProxy.AaMiDe.Rfpc
+namespace RfpProxy.AaMiDe.AaMiDe.Rfpc
 {
     public sealed class StatisticDataRfpcValue:DnmRfpcValue
     {
@@ -41,27 +41,27 @@ namespace RfpProxy.AaMiDe.Rfpc
 
         public override bool HasUnknown => !Reserved1.Span.IsEmpty() || !Reserved2.Span.IsEmpty() || base.HasUnknown;
 
-        public override ReadOnlyMemory<byte> Raw => base.Raw.Slice(52);
+        public override ReadOnlyMemory<byte> Raw => base.Raw[52..];
 
         public StatisticDataRfpcValue(ReadOnlyMemory<byte> data):base(RfpcKey.StatisticData, data)
         {
             var span = data.Span;
             BmcConnections01_03 = BinaryPrimitives.ReadUInt16LittleEndian(span);
-            BmcConnections04_06 = BinaryPrimitives.ReadUInt16LittleEndian(span.Slice(2));
-            BmcConnections07_09 = BinaryPrimitives.ReadUInt16LittleEndian(span.Slice(4));
-            BmcConnections10_12 = BinaryPrimitives.ReadUInt16LittleEndian(span.Slice(6));
-            BmcDspChans01_02 = BinaryPrimitives.ReadUInt16LittleEndian(span.Slice(8));
-            BmcDspChans03_04 = BinaryPrimitives.ReadUInt16LittleEndian(span.Slice(10));
-            BmcDspChans05_06 = BinaryPrimitives.ReadUInt16LittleEndian(span.Slice(12));
-            BmcDspChans07_08 = BinaryPrimitives.ReadUInt16LittleEndian(span.Slice(14));
-            LostConnections = BinaryPrimitives.ReadUInt16LittleEndian(span.Slice(16));
+            BmcConnections04_06 = BinaryPrimitives.ReadUInt16LittleEndian(span[2..]);
+            BmcConnections07_09 = BinaryPrimitives.ReadUInt16LittleEndian(span[4..]);
+            BmcConnections10_12 = BinaryPrimitives.ReadUInt16LittleEndian(span[6..]);
+            BmcDspChans01_02 = BinaryPrimitives.ReadUInt16LittleEndian(span[8..]);
+            BmcDspChans03_04 = BinaryPrimitives.ReadUInt16LittleEndian(span[10..]);
+            BmcDspChans05_06 = BinaryPrimitives.ReadUInt16LittleEndian(span[12..]);
+            BmcDspChans07_08 = BinaryPrimitives.ReadUInt16LittleEndian(span[14..]);
+            LostConnections = BinaryPrimitives.ReadUInt16LittleEndian(span[16..]);
             Reserved1 = data.Slice(18, 16);
-            MacReset = BinaryPrimitives.ReadUInt16LittleEndian(span.Slice(34));
+            MacReset = BinaryPrimitives.ReadUInt16LittleEndian(span[34..]);
             Reserved2 = data.Slice(36, 4);
-            RejectDummy = BinaryPrimitives.ReadUInt16LittleEndian(span.Slice(40));
-            BadFrames = BinaryPrimitives.ReadUInt32LittleEndian(span.Slice(42));
-            GoodFrames = BinaryPrimitives.ReadUInt32LittleEndian(span.Slice(46));
-            HoTimer = BinaryPrimitives.ReadUInt16LittleEndian(span.Slice(50));
+            RejectDummy = BinaryPrimitives.ReadUInt16LittleEndian(span[40..]);
+            BadFrames = BinaryPrimitives.ReadUInt32LittleEndian(span[42..]);
+            GoodFrames = BinaryPrimitives.ReadUInt32LittleEndian(span[46..]);
+            HoTimer = BinaryPrimitives.ReadUInt16LittleEndian(span[50..]);
         }
 
         public override void Log(TextWriter writer)

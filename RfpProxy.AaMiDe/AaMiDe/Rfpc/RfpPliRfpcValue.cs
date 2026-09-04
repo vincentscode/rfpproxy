@@ -1,13 +1,13 @@
 ﻿using System;
 using System.IO;
 
-namespace RfpProxy.AaMiDe.Rfpc
+namespace RfpProxy.AaMiDe.AaMiDe.Rfpc
 {
     public sealed class RfpPliRfpcValue : DnmRfpcValue
     {
         public byte LengthIndicator { get; }
 
-        public override ReadOnlyMemory<byte> Raw => base.Raw.Slice(1);
+        public override ReadOnlyMemory<byte> Raw => base.Raw[1..];
 
         public RfpPliRfpcValue(ReadOnlyMemory<byte> data):base(RfpcKey.RfpPli, data)
         {

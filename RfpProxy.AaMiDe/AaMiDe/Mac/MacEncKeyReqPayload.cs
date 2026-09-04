@@ -1,9 +1,9 @@
 ﻿using System;
 using System.Buffers.Binary;
 using System.IO;
-using RfpProxy.AaMiDe.Dnm;
+using RfpProxy.AaMiDe.AaMiDe.Dnm;
 
-namespace RfpProxy.AaMiDe.Mac
+namespace RfpProxy.AaMiDe.AaMiDe.Mac
 {
     public sealed class MacEncKeyReqPayload : DnmPayload
     {
@@ -11,7 +11,7 @@ namespace RfpProxy.AaMiDe.Mac
 
         public byte Id { get; }
 
-        public override ReadOnlyMemory<byte> Raw => base.Raw.Slice(9);
+        public override ReadOnlyMemory<byte> Raw => base.Raw[9..];
 
         public MacEncKeyReqPayload(ReadOnlyMemory<byte> data) : base(data)
         {

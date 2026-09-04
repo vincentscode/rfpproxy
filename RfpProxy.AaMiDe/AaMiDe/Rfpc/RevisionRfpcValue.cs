@@ -2,7 +2,7 @@
 using System.Buffers.Binary;
 using System.IO;
 
-namespace RfpProxy.AaMiDe.Rfpc
+namespace RfpProxy.AaMiDe.AaMiDe.Rfpc
 {
     public sealed class RevisionRfpcValue : DnmRfpcValue
     {
@@ -14,15 +14,15 @@ namespace RfpProxy.AaMiDe.Rfpc
         
         public ushort HW { get; }
 
-        public override ReadOnlyMemory<byte> Raw => base.Raw.Slice(7);
+        public override ReadOnlyMemory<byte> Raw => base.Raw[7..];
 
         public RevisionRfpcValue(ReadOnlyMemory<byte> data) : base(RfpcKey.Revision, data)
         {
             var span = data.Span;
             Generation = span[0];
-            BootSW = BinaryPrimitives.ReadUInt16BigEndian(span.Slice(1));
-            ProgSW = BinaryPrimitives.ReadUInt16BigEndian(span.Slice(3));
-            HW = BinaryPrimitives.ReadUInt16BigEndian(span.Slice(5));
+            BootSW = BinaryPrimitives.ReadUInt16BigEndian(span[1..]);
+            ProgSW = BinaryPrimitives.ReadUInt16BigEndian(span[3..]);
+            HW = BinaryPrimitives.ReadUInt16BigEndian(span[5..]);
         }
 
         public override void Log(TextWriter writer)

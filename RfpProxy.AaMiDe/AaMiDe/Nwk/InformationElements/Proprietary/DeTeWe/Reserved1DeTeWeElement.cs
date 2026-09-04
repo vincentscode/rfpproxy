@@ -2,7 +2,7 @@
 using System.IO;
 using RfpProxyLib;
 
-namespace RfpProxy.AaMiDe.Nwk.InformationElements.Proprietary.DeTeWe
+namespace RfpProxy.AaMiDe.AaMiDe.Nwk.InformationElements.Proprietary.DeTeWe
 {
     public class Reserved1DeTeWeElement : DeTeWeElement
     {
@@ -21,13 +21,13 @@ namespace RfpProxy.AaMiDe.Nwk.InformationElements.Proprietary.DeTeWe
                 Raw = data;
                 return;
             }
-            data = data.Slice(1);
+            data = data[1..];
             Text1 = data.Span.CString();
             var eos = data.Span.IndexOf((byte) 0);
-            data = data.Slice(eos + 1);
+            data = data[(eos + 1)..];
             Text2 = data.Span.CString();
             eos = data.Span.IndexOf((byte) 0);
-            Raw = data.Slice(eos + 1);
+            Raw = data[(eos + 1)..];
         }
 
         public override void Log(TextWriter writer)

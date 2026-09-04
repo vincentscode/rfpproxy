@@ -1,9 +1,9 @@
-﻿using RfpProxy.AaMiDe.Dnm;
-using System;
+﻿using System;
 using System.Buffers.Binary;
 using System.IO;
+using RfpProxy.AaMiDe.AaMiDe.Dnm;
 
-namespace RfpProxy.AaMiDe.Mac
+namespace RfpProxy.AaMiDe.AaMiDe.Mac
 {
     public sealed class MacPageReqMessage : AaMiDeMessage
     {
@@ -17,7 +17,7 @@ namespace RfpProxy.AaMiDe.Mac
 
         public ushort PMID { get; }
 
-        protected override ReadOnlyMemory<byte> Raw => base.Raw.Slice(6);
+        protected override ReadOnlyMemory<byte> Raw => base.Raw[6..];
 
         [Flags]
         public enum FlagsType : byte
@@ -34,7 +34,7 @@ namespace RfpProxy.AaMiDe.Mac
             DnmType = (DnmType) span[1];
             Padding = span[2];
             Flags = (FlagsType) span[3];
-            PMID = BinaryPrimitives.ReadUInt16BigEndian(span.Slice(4));
+            PMID = BinaryPrimitives.ReadUInt16BigEndian(span[4..]);
         }
 
         public override void Log(TextWriter writer)

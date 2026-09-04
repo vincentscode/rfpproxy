@@ -1,13 +1,13 @@
 ﻿using System;
 using System.IO;
 
-namespace RfpProxy.AaMiDe.Rfpc
+namespace RfpProxy.AaMiDe.AaMiDe.Rfpc
 {
     public sealed class ReflectingEnvironmentRfpcValue : DnmRfpcValue
     {
         public bool ReflectingEnvironment { get; }
 
-        public override ReadOnlyMemory<byte> Raw => base.Raw.Slice(1);
+        public override ReadOnlyMemory<byte> Raw => base.Raw[1..];
 
         public ReflectingEnvironmentRfpcValue(ReadOnlyMemory<byte> data):base(RfpcKey.ReflectingEnvironment, data)
         {

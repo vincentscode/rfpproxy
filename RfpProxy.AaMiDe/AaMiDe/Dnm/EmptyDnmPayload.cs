@@ -1,7 +1,7 @@
 ﻿using System;
 using System.IO;
 
-namespace RfpProxy.AaMiDe.Dnm
+namespace RfpProxy.AaMiDe.AaMiDe.Dnm
 {
     public sealed class EmptyDnmPayload : DnmPayload
     {

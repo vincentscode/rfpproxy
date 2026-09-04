@@ -2,7 +2,7 @@
 using System.IO;
 using RfpProxyLib;
 
-namespace RfpProxy.AaMiDe.Nwk.InformationElements.Proprietary
+namespace RfpProxy.AaMiDe.AaMiDe.Nwk.InformationElements.Proprietary
 {
     public class UnknownProprietaryContent : NwkIeProprietaryContent
     {

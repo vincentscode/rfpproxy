@@ -1,9 +1,9 @@
 ﻿using System;
 using System.IO;
-using RfpProxy.AaMiDe.Dnm;
+using RfpProxy.AaMiDe.AaMiDe.Dnm;
 using RfpProxyLib;
 
-namespace RfpProxy.AaMiDe.Mac
+namespace RfpProxy.AaMiDe.AaMiDe.Mac
 {
     public sealed class MacHoFailedIndPayload : DnmPayload
     {
@@ -16,7 +16,7 @@ namespace RfpProxy.AaMiDe.Mac
 
         public override bool HasUnknown => base.HasUnknown || !Enum.IsDefined(typeof(HoFailedReason), Reason);
 
-        public override ReadOnlyMemory<byte> Raw => base.Raw.Slice(1);
+        public override ReadOnlyMemory<byte> Raw => base.Raw[1..];
 
         public MacHoFailedIndPayload(ReadOnlyMemory<byte> data):base(data)
         {

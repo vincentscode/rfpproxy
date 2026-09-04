@@ -1,4 +1,4 @@
-﻿namespace RfpProxy.AaMiDe.Sync
+﻿namespace RfpProxy.AaMiDe.AaMiDe.Sync
 {
     public enum SyncMessageType : ushort
     {

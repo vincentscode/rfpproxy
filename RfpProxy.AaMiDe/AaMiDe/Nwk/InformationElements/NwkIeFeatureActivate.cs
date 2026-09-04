@@ -2,7 +2,7 @@
 using System.IO;
 using RfpProxyLib;
 
-namespace RfpProxy.AaMiDe.Nwk.InformationElements
+namespace RfpProxy.AaMiDe.AaMiDe.Nwk.InformationElements
 {
     public sealed class NwkIeFeatureActivate : NwkVariableLengthInformationElement
     {
@@ -67,7 +67,7 @@ namespace RfpProxy.AaMiDe.Nwk.InformationElements
                 case FeatureType.ExternalHandoverSwitch:
                 case FeatureType.QueueEntryRequest:
                 case FeatureType.IndicationOfSubscriberNumber:
-                    Raw = data.Slice(1);
+                    Raw = data[1..];
                     HasUnknown = !Raw.IsEmpty;
                     break;
                 case FeatureType.FeatureKey:
@@ -77,7 +77,7 @@ namespace RfpProxy.AaMiDe.Nwk.InformationElements
                 case FeatureType.CostInformation:
                 default:
                     Parameter = span[1];
-                    Raw = data.Slice(2);
+                    Raw = data[2..];
                     HasUnknown = !Raw.IsEmpty;
                     break;
             }

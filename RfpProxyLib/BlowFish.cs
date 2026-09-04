@@ -250,7 +250,7 @@ namespace RfpProxyLib
             byte[] result = new byte[(data.Length + 7) & ~7];
             if (!decrypt)
             {
-                var localIv = iv.Slice(0, 8).ToArray();
+                var localIv = iv[..8].ToArray();
                 data.CopyTo(result);
                 byte[] block = new byte[8];
                 for (int i = 0; i < result.Length; i += 8)
@@ -266,7 +266,7 @@ namespace RfpProxyLib
             {
                 data.CopyTo(result);
                 
-                var localIv = iv.Slice(0, 8);
+                var localIv = iv[..8];
                 for (int i = 0; i < result.Length; i += 8)
                 {
                     var current = result.AsSpan(i, 8);
@@ -299,10 +299,10 @@ namespace RfpProxyLib
         private void BlockEncrypt(Span<byte> block)
         {
             var xlPar = BinaryPrimitives.ReadUInt32BigEndian(block);
-            var xrPar = BinaryPrimitives.ReadUInt32BigEndian(block.Slice(4));
+            var xrPar = BinaryPrimitives.ReadUInt32BigEndian(block[4..]);
             Encipher(ref xlPar, ref xrPar);
             BinaryPrimitives.WriteUInt32BigEndian(block, xlPar);
-            BinaryPrimitives.WriteUInt32BigEndian(block.Slice(4), xrPar);
+            BinaryPrimitives.WriteUInt32BigEndian(block[4..], xrPar);
         }
 
         /// <summary>
@@ -312,10 +312,10 @@ namespace RfpProxyLib
         private void BlockDecrypt(Span<byte> block)
         {
             var xlPar = BinaryPrimitives.ReadUInt32BigEndian(block);
-            var xrPar = BinaryPrimitives.ReadUInt32BigEndian(block.Slice(4));
+            var xrPar = BinaryPrimitives.ReadUInt32BigEndian(block[4..]);
             Decipher(ref xlPar, ref xrPar);
             BinaryPrimitives.WriteUInt32BigEndian(block, xlPar);
-            BinaryPrimitives.WriteUInt32BigEndian(block.Slice(4), xrPar);
+            BinaryPrimitives.WriteUInt32BigEndian(block[4..], xrPar);
         }
 
         /// <summary>

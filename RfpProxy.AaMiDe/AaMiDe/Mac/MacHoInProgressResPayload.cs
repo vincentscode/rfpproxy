@@ -1,9 +1,9 @@
 ﻿using System;
 using System.IO;
-using RfpProxy.AaMiDe.Dnm;
+using RfpProxy.AaMiDe.AaMiDe.Dnm;
 using RfpProxyLib;
 
-namespace RfpProxy.AaMiDe.Mac
+namespace RfpProxy.AaMiDe.AaMiDe.Mac
 {
     public sealed class MacHoInProgressResPayload : DnmPayload
     {
@@ -15,7 +15,7 @@ namespace RfpProxy.AaMiDe.Mac
 
         public byte Id { get; }
 
-        public override ReadOnlyMemory<byte> Raw => base.Raw.Slice(11);
+        public override ReadOnlyMemory<byte> Raw => base.Raw[11..];
 
         public MacHoInProgressResPayload(ReadOnlyMemory<byte> data):base(data)
         {

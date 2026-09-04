@@ -1,4 +1,4 @@
-﻿namespace RfpProxy.AaMiDe.Nwk.InformationElements
+﻿namespace RfpProxy.AaMiDe.AaMiDe.Nwk.InformationElements
 {
     public enum DECTControlCodes : byte
     {

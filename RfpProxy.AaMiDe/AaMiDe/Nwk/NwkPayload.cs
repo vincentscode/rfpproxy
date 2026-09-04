@@ -1,7 +1,7 @@
 ﻿using System;
 using System.IO;
 
-namespace RfpProxy.AaMiDe.Nwk
+namespace RfpProxy.AaMiDe.AaMiDe.Nwk
 {
     public abstract class NwkPayload
     {
@@ -32,9 +32,9 @@ namespace RfpProxy.AaMiDe.Nwk
             {
                 //TVX - ETSI EN 300 175-5 7.3
                 ti = data.Span[1];
-                data = data.Slice(1);
+                data = data[1..];
             }
-            data = data.Slice(1);
+            data = data[1..];
             switch (pd)
             {
                 case NwkProtocolDiscriminator.LCE:

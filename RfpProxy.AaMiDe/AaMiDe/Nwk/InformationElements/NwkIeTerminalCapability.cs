@@ -1,7 +1,7 @@
 ﻿using System;
 using System.IO;
 
-namespace RfpProxy.AaMiDe.Nwk.InformationElements
+namespace RfpProxy.AaMiDe.AaMiDe.Nwk.InformationElements
 {
     public sealed class NwkIeTerminalCapability : NwkVariableLengthInformationElement
     {
@@ -299,128 +299,128 @@ namespace RfpProxy.AaMiDe.Nwk.InformationElements
             Display = (DisplayCapabilities)(span[0] & 0xf);
             if (span[0] >= 128)
                 goto OctetGroup4;
-            span = span.Slice(1);
+            span = span[1..];
 
             Echo = (EchoParameters)((span[0] & 0x70) >> 4);
             NRej = (AmbientNoiseRejectionCapabilities)((span[0] & 0xc) >> 2);
             AVol = (AdaptiveVolumeControl)(span[0] & 0x3);
             if (span[0] >= 128)
                 goto OctetGroup4;
-            span = span.Slice(1);
+            span = span[1..];
 
             SlotTypes = (SlotCapabilities)(span[0] & 0x7f);
             if (span[0] >= 128)
                 goto OctetGroup4;
-            span = span.Slice(1);
+            span = span[1..];
 
             DisplayCharCount = (ushort)(span[0] & 0x7f);
             if (span[0] >= 128)
                 goto OctetGroup4;
-            span = span.Slice(1);
+            span = span[1..];
 
             DisplayCharCount = (ushort)((DisplayCharCount << 7) | (span[0] & 0x7f));
             if (span[0] >= 128)
                 goto OctetGroup4;
-            span = span.Slice(1);
+            span = span[1..];
 
             DisplayLines = (byte)(span[0] & 0x7f);
             if (span[0] >= 128)
                 goto OctetGroup4;
-            span = span.Slice(1);
+            span = span[1..];
 
             CharsPerLine = (byte)(span[0] & 0x7f);
             if (span[0] >= 128)
                 goto OctetGroup4;
-            span = span.Slice(1);
+            span = span[1..];
 
             ScrollBehaviour = (ScrollingBehaviourType)(span[0] & 0x7f);
             if (span[0] >= 128)
                 goto OctetGroup4;
-            span = span.Slice(1);
+            span = span[1..];
             
             HasUnknown = true;
             while (span[0] <= 128)
             {
-                span = span.Slice(1);
+                span = span[1..];
             }
             OctetGroup4:
-            span = span.Slice(1);
+            span = span[1..];
 
             Profile1 = (ProfileIndicator1)(span[0] & 0x7f);
             if (span[0] >= 128)
                 goto OctetGroup5;
-            span = span.Slice(1);
+            span = span[1..];
 
             Profile2 = (ProfileIndicator2)(span[0] & 0x7f);
             if (span[0] >= 128)
                 goto OctetGroup5;
-            span = span.Slice(1);
+            span = span[1..];
 
             Profile3 = (ProfileIndicator3)(span[0] & 0x7f);
             if (span[0] >= 128)
                 goto OctetGroup5;
-            span = span.Slice(1);
+            span = span[1..];
 
             Profile4 = (ProfileIndicator4)(span[0] & 0x7f);
             if (span[0] >= 128)
                 goto OctetGroup5;
-            span = span.Slice(1);
+            span = span[1..];
 
             Profile5 = (ProfileIndicator5)(span[0] & 0x7f);
             if (span[0] >= 128)
                 goto OctetGroup5;
-            span = span.Slice(1);
+            span = span[1..];
 
             Profile6 = (ProfileIndicator6)(span[0] & 0x7f);
             if (span[0] >= 128)
                 goto OctetGroup5;
-            span = span.Slice(1);
+            span = span[1..];
 
             Profile7 = (ProfileIndicator7)(span[0] & 0x7f);
             if (span[0] >= 128)
                 goto OctetGroup5;
-            span = span.Slice(1);
+            span = span[1..];
 
             Profile8 = (ProfileIndicator8)(span[0] & 0x7f);
             if (span[0] >= 128)
                 goto OctetGroup5;
-            span = span.Slice(1);
+            span = span[1..];
 
             Profile9 = (ProfileIndicator9)(span[0] & 0x7f);
             if (span[0] >= 128)
                 goto OctetGroup5;
-            span = span.Slice(1);
+            span = span[1..];
 
             Profile10 = (ProfileIndicator10)(span[0] & 0x7f);
             if (span[0] >= 128)
                 goto OctetGroup5;
-            span = span.Slice(1);
+            span = span[1..];
 
             HasUnknown = true;
             while (span[0] <= 128)
             {
-                span = span.Slice(1);
+                span = span[1..];
             }
             OctetGroup5:
-            span = span.Slice(1);
+            span = span[1..];
             Dsaa2 = (span[0] & 0x40) != 0;
             Dsc2 = (span[0] & 0x20) != 0;
             ControlCode = (ControlCodes) (span[0] & 0b0111);
             if (span[0] >= 128)
                 goto OctetGroup6;
-            span = span.Slice(1);
+            span = span[1..];
             Charsets = (CharacterSets) (span[0] & 0x7f);
             if (span[0] >= 128)
                 goto OctetGroup6;
-            span = span.Slice(1);
+            span = span[1..];
 
             HasUnknown = true;
             while (span[0] <= 128)
             {
-                span = span.Slice(1);
+                span = span[1..];
             }
             OctetGroup6:
-            span = span.Slice(1);
+            span = span[1..];
             if (span.IsEmpty)
                 return;
             BlindSlot = (BlindSlotIndication) ((span[0] >> 5) & 0x3);
@@ -432,7 +432,7 @@ namespace RfpProxy.AaMiDe.Nwk.InformationElements
             
             if (span[0] >= 128)
                 return;
-            span = span.Slice(1);
+            span = span[1..];
             
             Sp5 = (span[0] & 0x40) != 0;
             Sp6 = (span[0] & 0x20) != 0;

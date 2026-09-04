@@ -2,7 +2,7 @@
 using System.Buffers.Binary;
 using System.IO;
 
-namespace RfpProxy.AaMiDe.Rfpc
+namespace RfpProxy.AaMiDe.AaMiDe.Rfpc
 {
     public sealed class HigherLayerCapabilitiesRfpcValue : DnmRfpcValue
     {
@@ -32,7 +32,7 @@ namespace RfpProxy.AaMiDe.Rfpc
 
         public HigherLayerCapabilities Capabilities { get; }
 
-        public override ReadOnlyMemory<byte> Raw => base.Raw.Slice(2);
+        public override ReadOnlyMemory<byte> Raw => base.Raw[2..];
 
         public HigherLayerCapabilitiesRfpcValue(ReadOnlyMemory<byte> data):base(RfpcKey.HigherLayerCapabilities, data)
         {

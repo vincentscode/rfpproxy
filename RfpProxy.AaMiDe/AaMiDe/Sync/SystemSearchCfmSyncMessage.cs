@@ -2,13 +2,13 @@
 using System.Buffers.Binary;
 using System.IO;
 
-namespace RfpProxy.AaMiDe.Sync
+namespace RfpProxy.AaMiDe.AaMiDe.Sync
 {
     public sealed class SystemSearchCfmSyncMessage : SyncMessage
     {
         public (ushort,ushort)[] Rssi { get; }
 
-        protected override ReadOnlyMemory<byte> Raw =>base.Raw.Slice(Rssi == null ? 0 : 1).Slice(4 * Rssi?.Length ?? 0);
+        protected override ReadOnlyMemory<byte> Raw =>base.Raw[(Rssi == null ? 0 : 1)..][(4 * Rssi?.Length ?? 0)..];
 
         public SystemSearchCfmSyncMessage(ReadOnlyMemory<byte> data):base(SyncMessageType.SystemSearchCfm, data)
         {
@@ -16,12 +16,12 @@ namespace RfpProxy.AaMiDe.Sync
                 return;
             var span = base.Raw.Span;
             var count = span[0];
-            span = span.Slice(1);
+            span = span[1..];
             Rssi = new (ushort, ushort)[count];
             for (int i = 0; i < count; i++)
             {
                 var rfpn = BinaryPrimitives.ReadUInt16LittleEndian(span);
-                var rssi = BinaryPrimitives.ReadUInt16LittleEndian(span.Slice(2));
+                var rssi = BinaryPrimitives.ReadUInt16LittleEndian(span[2..]);
                 Rssi[i] = (rfpn, rssi);
             }
         }

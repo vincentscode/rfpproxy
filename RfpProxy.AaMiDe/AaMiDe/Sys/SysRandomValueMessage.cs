@@ -2,7 +2,7 @@
 using System.Buffers.Binary;
 using System.IO;
 
-namespace RfpProxy.AaMiDe.Sys
+namespace RfpProxy.AaMiDe.AaMiDe.Sys
 {
     public sealed class SysRandomValueMessage : AaMiDeMessage
     {
@@ -10,7 +10,7 @@ namespace RfpProxy.AaMiDe.Sys
 
         public override bool HasUnknown => false;
 
-        protected override ReadOnlyMemory<byte> Raw => base.Raw.Slice(4);
+        protected override ReadOnlyMemory<byte> Raw => base.Raw[4..];
 
         public SysRandomValueMessage(ReadOnlyMemory<byte> data) : base(MsgType.SYS_RANDOM_VALUE, data)
         {

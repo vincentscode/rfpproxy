@@ -1,7 +1,7 @@
 ﻿using System;
 using System.IO;
 
-namespace RfpProxy.AaMiDe.Nwk.InformationElements
+namespace RfpProxy.AaMiDe.AaMiDe.Nwk.InformationElements
 {
     public sealed class NwkIeCipherInfo : NwkVariableLengthInformationElement
     {
@@ -36,18 +36,18 @@ namespace RfpProxy.AaMiDe.Nwk.InformationElements
 
         public byte KeyNumber { get; }
 
-        public override ReadOnlyMemory<byte> Raw => Algorithm == CipherAlgorithm.Proprietary ? base.Raw.Slice(3) : base.Raw.Slice(2);
+        public override ReadOnlyMemory<byte> Raw => Algorithm == CipherAlgorithm.Proprietary ? base.Raw[3..] : base.Raw[2..];
 
         public NwkIeCipherInfo(ReadOnlyMemory<byte> data) : base(NwkVariableLengthElementType.CipherInfo, data)
         {
             var span = data.Span;
             Enable = (span[0] & 0x80) != 0;
             Algorithm = (CipherAlgorithm) (span[0] & 0x7f);
-            span = span.Slice(1);
+            span = span[1..];
             if (Algorithm == CipherAlgorithm.Proprietary)
             {
                 Proprietary = span[0];
-                span = span.Slice(1);
+                span = span[1..];
             }
             KeyType = (CipherKeyType) (span[0] >> 4);
             KeyNumber = (byte) (span[0] & 0xf);

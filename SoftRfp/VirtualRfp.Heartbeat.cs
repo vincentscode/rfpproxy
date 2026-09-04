@@ -1,24 +1,24 @@
 ﻿using System;
 using System.Threading;
 using RfpProxy.AaMiDe;
-using RfpProxy.AaMiDe.Sys;
+using RfpProxy.AaMiDe.AaMiDe;
+using RfpProxy.AaMiDe.AaMiDe.Sys;
 
-namespace RfpProxy.Virtual
+namespace RfpProxy.Virtual;
+
+partial class VirtualRfp
 {
-    partial class VirtualRfp
+    private readonly Timer _heartbeatTimer;
+    private readonly DateTime _bootTimestamp = DateTime.Now;
+
+    private void SendHeartbeat(object state)
     {
-        private readonly Timer _heartbeatTimer;
-        private readonly DateTime _bootTimestamp = DateTime.Now;
+        var heartbeat = new HeartbeatMessage(DateTime.Now - _bootTimestamp);
+        SendMessage(heartbeat);
+    }
 
-        private void SendHeartbeat(object state)
-        {
-            var heartbeat = new HeartbeatMessage(DateTime.Now - _bootTimestamp);
-            SendMessage(heartbeat);
-        }
-
-        void OnHeartbeatInterval(SysHeartbeatIntervalMessage message)
-        {
-            _heartbeatTimer.Change(message.Interval, message.Interval);
-        }
+    void OnHeartbeatInterval(SysHeartbeatIntervalMessage message)
+    {
+        _heartbeatTimer.Change(message.Interval, message.Interval);
     }
 }

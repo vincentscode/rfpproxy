@@ -1,12 +1,12 @@
 ﻿using System;
 
-namespace RfpProxy.AaMiDe.Nwk
+namespace RfpProxy.AaMiDe.AaMiDe.Nwk
 {
     public class NwkLCESFormatPayload : NwkSFormatPayload
     {
         public NwkLCEMessageType Type { get; }
 
-        public NwkLCESFormatPayload(byte ti, bool f, ReadOnlyMemory<byte> data) : base(NwkProtocolDiscriminator.LCE, ti, f, data.Slice(1))
+        public NwkLCESFormatPayload(byte ti, bool f, ReadOnlyMemory<byte> data) : base(NwkProtocolDiscriminator.LCE, ti, f, data[1..])
         {
             Type = (NwkLCEMessageType)data.Span[0];
             switch (Type)

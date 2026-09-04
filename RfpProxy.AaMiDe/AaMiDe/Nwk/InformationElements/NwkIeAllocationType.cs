@@ -1,7 +1,7 @@
 ﻿using System;
 using System.IO;
 
-namespace RfpProxy.AaMiDe.Nwk.InformationElements
+namespace RfpProxy.AaMiDe.AaMiDe.Nwk.InformationElements
 {
     public sealed class NwkIeAllocationType : NwkVariableLengthInformationElement
     {
@@ -27,7 +27,7 @@ namespace RfpProxy.AaMiDe.Nwk.InformationElements
 
         public Relation AcRelation { get; }
 
-        public override ReadOnlyMemory<byte> Raw => base.Raw.Slice(2);
+        public override ReadOnlyMemory<byte> Raw => base.Raw[2..];
 
         public NwkIeAllocationType(ReadOnlyMemory<byte> data):base(NwkVariableLengthElementType.AllocationType, data)
         {

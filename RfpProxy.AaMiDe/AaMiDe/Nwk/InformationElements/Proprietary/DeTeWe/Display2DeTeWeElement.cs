@@ -2,7 +2,7 @@
 using System.IO;
 using System.Text;
 
-namespace RfpProxy.AaMiDe.Nwk.InformationElements.Proprietary.DeTeWe
+namespace RfpProxy.AaMiDe.AaMiDe.Nwk.InformationElements.Proprietary.DeTeWe
 {
     public class Display2DeTeWeElement : DeTeWeElement
     {
@@ -17,7 +17,7 @@ namespace RfpProxy.AaMiDe.Nwk.InformationElements.Proprietary.DeTeWe
             if (data.Span[0] == 0x81)
             {
                 Raw = ReadOnlyMemory<byte>.Empty;
-                Text = Encoding.UTF8.GetString(data.Span.Slice(1));
+                Text = Encoding.UTF8.GetString(data.Span[1..]);
             }
             else
             {

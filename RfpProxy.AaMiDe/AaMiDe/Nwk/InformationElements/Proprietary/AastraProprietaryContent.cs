@@ -1,9 +1,9 @@
 ﻿using System;
 using System.IO;
-using RfpProxy.AaMiDe.Nwk.InformationElements.Proprietary.Aastra;
+using RfpProxy.AaMiDe.AaMiDe.Nwk.InformationElements.Proprietary.Aastra;
 using RfpProxyLib;
 
-namespace RfpProxy.AaMiDe.Nwk.InformationElements.Proprietary
+namespace RfpProxy.AaMiDe.AaMiDe.Nwk.InformationElements.Proprietary
 {
     public class AastraProprietaryContent : NwkIeProprietaryContent
     {
@@ -27,26 +27,26 @@ namespace RfpProxy.AaMiDe.Nwk.InformationElements.Proprietary
         {
             Type = (AastraType) data.Span[0];
             var length = data.Span[1];
-            data = data.Slice(2);
+            data = data[2..];
             switch (Type)
             {
                 case AastraType.Firmware:
-                    Content = new FirmwareAastraElement(data.Slice(0,length));
+                    Content = new FirmwareAastraElement(data[..length]);
                     break;
                 case AastraType.Firmware2:
-                    Content = new Firmware2AastraElement(data.Slice(0,length));
+                    Content = new Firmware2AastraElement(data[..length]);
                     break;
                 case AastraType.Update:
-                    Content = new UpdateAastraElement(data.Slice(0,length));
+                    Content = new UpdateAastraElement(data[..length]);
                     break;
                 case AastraType.UpdateAck:
-                    Content = new UpdateAckAastraElement(data.Slice(0,length));
+                    Content = new UpdateAckAastraElement(data[..length]);
                     break;
                 default:
-                    Content =new UnknownAastraElement(data.Slice(0,length));
+                    Content =new UnknownAastraElement(data[..length]);
                     break;
             }
-            Raw = data.Slice(length);
+            Raw = data[length..];
         }
 
         public override void Log(TextWriter writer)

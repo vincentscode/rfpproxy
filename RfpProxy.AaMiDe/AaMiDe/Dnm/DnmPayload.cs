@@ -1,8 +1,8 @@
-﻿using RfpProxy.AaMiDe.Mac;
-using System;
+﻿using System;
 using System.IO;
+using RfpProxy.AaMiDe.AaMiDe.Mac;
 
-namespace RfpProxy.AaMiDe.Dnm
+namespace RfpProxy.AaMiDe.AaMiDe.Dnm
 {
     public abstract class DnmPayload
     {
@@ -17,15 +17,12 @@ namespace RfpProxy.AaMiDe.Dnm
 
         public static DnmPayload Create(DnmLayer layer, DnmType type, ReadOnlyMemory<byte> data, MacConnection connection)
         {
-            switch (layer)
+            return layer switch
             {
-                case DnmLayer.Mac:
-                    return CreateMac(type, data, connection);
-                case DnmLayer.Lc:
-                    return CreateLc(type, data, connection);
-                default:
-                    return new UnknownDnmPayload(data);
-            }
+                DnmLayer.Mac => CreateMac(type, data, connection),
+                DnmLayer.Lc => CreateLc(type, data, connection),
+                _ => new UnknownDnmPayload(data),
+            };
         }
 
         private static DnmPayload CreateLc(DnmType type, ReadOnlyMemory<byte> data, MacConnection connection)

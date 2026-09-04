@@ -2,7 +2,7 @@
 using System.Buffers.Binary;
 using System.IO;
 
-namespace RfpProxy.AaMiDe.Rfpc
+namespace RfpProxy.AaMiDe.AaMiDe.Rfpc
 {
     public sealed class ExtendedCapabilities2RfpcValue : DnmRfpcValue
     {
@@ -61,13 +61,13 @@ namespace RfpProxy.AaMiDe.Rfpc
 
         public ExtendedVoiceServices ExtendedVoiceServicesSupported { get; }
 
-        public override ReadOnlyMemory<byte> Raw => base.Raw.Slice(5);
+        public override ReadOnlyMemory<byte> Raw => base.Raw[5..];
 
         public ExtendedCapabilities2RfpcValue(ReadOnlyMemory<byte> data):base(RfpcKey.ExtendedCapabilities2, data)
         {
             var span = data.Span;
             MacCapabilities = (ExtendedMacCapability) (((span[0] & 0xf) << 8) | span[1]);
-            var bits = BinaryPrimitives.ReadInt32BigEndian(span.Slice(1));
+            var bits = BinaryPrimitives.ReadInt32BigEndian(span[1..]);
             HigherLayerCapabilities = (ExtendedHigherLayerCapabilities) (bits & 0x00841FFF);
             DataCategory = (DprsDataCategory) ((bits >> 19) & 0xf);
             ExtendedVoiceServicesSupported = (ExtendedVoiceServices) ((bits >> 13) & 0x1f);

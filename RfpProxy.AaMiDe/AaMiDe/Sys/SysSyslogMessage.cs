@@ -3,7 +3,7 @@ using System.Buffers.Binary;
 using System.IO;
 using System.Net;
 
-namespace RfpProxy.AaMiDe.Sys
+namespace RfpProxy.AaMiDe.AaMiDe.Sys
 {
     public sealed class SysSyslogMessage : AaMiDeMessage
     {
@@ -14,15 +14,15 @@ namespace RfpProxy.AaMiDe.Sys
         /// <summary>
         /// padding
         /// </summary>
-        protected override ReadOnlyMemory<byte> Raw => base.Raw.Slice(18);
+        protected override ReadOnlyMemory<byte> Raw => base.Raw[18..];
 
         public override bool HasUnknown => false;
 
         public SysSyslogMessage(ReadOnlyMemory<byte> data):base(MsgType.SYS_SYSLOG, data)
         {
             var span = base.Raw.Span;
-            Ip = new IPAddress(span.Slice(0,16));
-            Port = BinaryPrimitives.ReadUInt16BigEndian(span.Slice(16));
+            Ip = new IPAddress(span[..16]);
+            Port = BinaryPrimitives.ReadUInt16BigEndian(span[16..]);
         }
 
         public override void Log(TextWriter writer)

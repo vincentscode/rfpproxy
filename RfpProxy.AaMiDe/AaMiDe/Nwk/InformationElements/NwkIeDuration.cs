@@ -1,7 +1,7 @@
 ﻿using System;
 using System.IO;
 
-namespace RfpProxy.AaMiDe.Nwk.InformationElements
+namespace RfpProxy.AaMiDe.AaMiDe.Nwk.InformationElements
 {
     public sealed class NwkIeDuration : NwkVariableLengthInformationElement
     {
@@ -30,7 +30,7 @@ namespace RfpProxy.AaMiDe.Nwk.InformationElements
 
         public TimeSpan Duration { get; }
 
-        public override ReadOnlyMemory<byte> Raw => base.Raw.Slice(2);
+        public override ReadOnlyMemory<byte> Raw => base.Raw[2..];
 
         public NwkIeDuration(ReadOnlyMemory<byte> data):base(NwkVariableLengthElementType.Duration, data)
         {

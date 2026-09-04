@@ -76,7 +76,7 @@ namespace RfpProxyLib
             {
                 var value = BinaryPrimitives.ReadUInt32BigEndian(data);
                 BinaryPrimitives.WriteUInt32LittleEndian(data, value);
-                data = data.Slice(4);
+                data = data[4..];
             }
         }
     }

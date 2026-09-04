@@ -2,7 +2,7 @@
 using System.Buffers.Binary;
 using System.IO;
 
-namespace RfpProxy.AaMiDe.Media
+namespace RfpProxy.AaMiDe.AaMiDe.Media
 {
     public sealed class MediaDtmfMessage : MediaMessage
     {
@@ -12,7 +12,7 @@ namespace RfpProxy.AaMiDe.Media
 
         public MediaDirection Direction { get; }
 
-        protected override ReadOnlyMemory<byte> Raw => base.Raw.Slice(4);
+        protected override ReadOnlyMemory<byte> Raw => base.Raw[4..];
 
         public MediaDtmfMessage(ReadOnlyMemory<byte> data) : base(MsgType.MEDIA_DTMF, data)
         {

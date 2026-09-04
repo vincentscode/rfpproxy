@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace RfpProxy.AaMiDe.Nwk.InformationElements
+namespace RfpProxy.AaMiDe.AaMiDe.Nwk.InformationElements
 {
     public abstract class NwkSingleByteInformationElement : NwkInformationElement
     {

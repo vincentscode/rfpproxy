@@ -1,7 +1,7 @@
 ﻿using System;
 using System.IO;
 
-namespace RfpProxy.AaMiDe.Sys
+namespace RfpProxy.AaMiDe.AaMiDe.Sys
 {
     public sealed class SysLedMessage : AaMiDeMessage
     {
@@ -24,7 +24,7 @@ namespace RfpProxy.AaMiDe.Sys
         /// <summary>
         /// padding
         /// </summary>
-        protected override ReadOnlyMemory<byte> Raw => base.Raw.Slice(2);
+        protected override ReadOnlyMemory<byte> Raw => base.Raw[2..];
 
         public override bool HasUnknown => false;
 

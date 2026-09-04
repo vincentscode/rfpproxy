@@ -3,7 +3,7 @@ using System.Buffers.Binary;
 using System.IO;
 using System.Net;
 
-namespace RfpProxy.AaMiDe.Media
+namespace RfpProxy.AaMiDe.AaMiDe.Media
 {
     public sealed class MediaRedirectStartMessage : MediaMessage
     {
@@ -21,18 +21,18 @@ namespace RfpProxy.AaMiDe.Media
 
         public uint Time { get; }
 
-        protected override ReadOnlyMemory<byte> Raw => base.Raw.Slice(18);
+        protected override ReadOnlyMemory<byte> Raw => base.Raw[18..];
 
         public MediaRedirectStartMessage(ReadOnlyMemory<byte> data):base(MsgType.MEDIA_REDIRECT_START, data)
         {
             var span = base.Raw.Span;
             Padding = BinaryPrimitives.ReadUInt16BigEndian(span);
-            LocalPort1 = BinaryPrimitives.ReadUInt16BigEndian(span.Slice(2));
-            LocalPort2 = BinaryPrimitives.ReadUInt16BigEndian(span.Slice(4));
+            LocalPort1 = BinaryPrimitives.ReadUInt16BigEndian(span[2..]);
+            LocalPort2 = BinaryPrimitives.ReadUInt16BigEndian(span[4..]);
             RemoteIpAddress = new IPAddress(span.Slice(6, 4));
-            RemotePort1 = BinaryPrimitives.ReadUInt16BigEndian(span.Slice(10));
-            RemotePort2 = BinaryPrimitives.ReadUInt16BigEndian(span.Slice(12));
-            Time = BinaryPrimitives.ReadUInt32LittleEndian(span.Slice(14));
+            RemotePort1 = BinaryPrimitives.ReadUInt16BigEndian(span[10..]);
+            RemotePort2 = BinaryPrimitives.ReadUInt16BigEndian(span[12..]);
+            Time = BinaryPrimitives.ReadUInt32LittleEndian(span[14..]);
         }
 
         public override void Log(TextWriter writer)

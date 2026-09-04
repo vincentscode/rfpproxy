@@ -1,4 +1,4 @@
-﻿using RfpProxy.AaMiDe.Mac;
+﻿using RfpProxy.AaMiDe.AaMiDe.Mac;
 
 namespace RfpProxy.AaMiDe
 {

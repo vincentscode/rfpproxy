@@ -3,7 +3,7 @@ using System.IO;
 using System.Net;
 using RfpProxyLib;
 
-namespace RfpProxy.AaMiDe
+namespace RfpProxy.AaMiDe.AaMiDe
 {
     public sealed class SnmpRfpUpdateMessage : AaMiDeMessage
     {
@@ -23,12 +23,12 @@ namespace RfpProxy.AaMiDe
 
         public override bool HasUnknown => false;
 
-        protected override ReadOnlyMemory<byte> Raw => base.Raw.Slice(0x14a);
+        protected override ReadOnlyMemory<byte> Raw => base.Raw[0x14a..];
 
         public SnmpRfpUpdateMessage(ReadOnlyMemory<byte> data):base(MsgType.SNMP_RFP_UPDATE, data)
         {
             var span = base.Raw.Span;
-            Server = new IPAddress(span.Slice(0, 4));
+            Server = new IPAddress(span[..4]);
             Contact = span.Slice(0x4, 0x51).CString();
             Location = span.Slice(0x55, 0x51).CString();
             Name = span.Slice(0xa6, 0x51).CString();

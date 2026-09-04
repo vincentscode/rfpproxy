@@ -2,7 +2,7 @@
 using System.Buffers.Binary;
 using System.IO;
 
-namespace RfpProxy.AaMiDe.Sync
+namespace RfpProxy.AaMiDe.AaMiDe.Sync
 {
     public abstract class SyncMessage : AaMiDeMessage
     {
@@ -10,7 +10,7 @@ namespace RfpProxy.AaMiDe.Sync
 
         public byte PayloadLength { get; }
 
-        protected override ReadOnlyMemory<byte> Raw => base.Raw.Slice(3);
+        protected override ReadOnlyMemory<byte> Raw => base.Raw[3..];
 
         protected SyncMessage(SyncMessageType type, ReadOnlyMemory<byte> data) : base(MsgType.SYNC, data)
         {
@@ -30,7 +30,7 @@ namespace RfpProxy.AaMiDe.Sync
 
         public static SyncMessage Create(ReadOnlyMemory<byte> data)
         {
-            var type = (SyncMessageType)BinaryPrimitives.ReadUInt16BigEndian(data.Span.Slice(4));
+            var type = (SyncMessageType)BinaryPrimitives.ReadUInt16BigEndian(data.Span[4..]);
             switch (type)
             {
                 case SyncMessageType.SetFrequency:

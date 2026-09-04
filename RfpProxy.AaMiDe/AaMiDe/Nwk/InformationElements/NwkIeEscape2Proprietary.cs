@@ -1,9 +1,9 @@
 ﻿using System;
 using System.Buffers.Binary;
 using System.IO;
-using RfpProxy.AaMiDe.Nwk.InformationElements.Proprietary;
+using RfpProxy.AaMiDe.AaMiDe.Nwk.InformationElements.Proprietary;
 
-namespace RfpProxy.AaMiDe.Nwk.InformationElements
+namespace RfpProxy.AaMiDe.AaMiDe.Nwk.InformationElements
 {
     public sealed class NwkIeEscape2Proprietary : NwkVariableLengthInformationElement
     {
@@ -31,13 +31,17 @@ namespace RfpProxy.AaMiDe.Nwk.InformationElements
             Discriminator = (DiscriminatorType) data.Span[0];
             if (Discriminator == DiscriminatorType.EMC)
             {
-                EMC = BinaryPrimitives.ReadUInt16BigEndian(data.Span.Slice(1));
-                Proprietary = NwkIeProprietaryContent.Create(EMC, data.Slice(3));
+                EMC = BinaryPrimitives.ReadUInt16BigEndian(data.Span[1..]);
+                Proprietary = NwkIeProprietaryContent.Create(EMC, data[3..]);
             }
             else
             {
-                Proprietary = new UnknownProprietaryContent(data.Slice(1));
+                Proprietary = new UnknownProprietaryContent(data[1..]);
             }
+        }
+
+        public NwkIeEscape2Proprietary(DiscriminatorType discriminatorType, ushort emc, NwkIeProprietaryContent content) : base(NwkVariableLengthElementType.Escape2Proprietary, ReadOnlyMemory<byte>.Empty)
+        {
         }
 
         public override void Log(TextWriter writer)

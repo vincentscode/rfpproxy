@@ -1,7 +1,7 @@
 ﻿using System;
 using System.IO;
 
-namespace RfpProxy.AaMiDe.Nwk.InformationElements.Proprietary.DeTeWe.Reserved2
+namespace RfpProxy.AaMiDe.AaMiDe.Nwk.InformationElements.Proprietary.DeTeWe.Reserved2
 {
     public abstract class Reserved2DeTeWeContent
     {

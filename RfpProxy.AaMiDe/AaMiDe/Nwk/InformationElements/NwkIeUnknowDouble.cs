@@ -1,6 +1,6 @@
 ﻿using System.IO;
 
-namespace RfpProxy.AaMiDe.Nwk.InformationElements
+namespace RfpProxy.AaMiDe.AaMiDe.Nwk.InformationElements
 {
     public sealed class NwkIeUnknowDouble : NwkDoubleByteInformationElement
     {

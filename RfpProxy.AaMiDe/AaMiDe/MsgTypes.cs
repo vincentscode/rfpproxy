@@ -1,4 +1,4 @@
-namespace RfpProxy.AaMiDe
+namespace RfpProxy.AaMiDe.AaMiDe
 {
     public enum MsgType : ushort
     {

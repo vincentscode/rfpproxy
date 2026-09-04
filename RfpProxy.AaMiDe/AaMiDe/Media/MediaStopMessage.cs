@@ -1,7 +1,7 @@
 ﻿using System;
 using System.IO;
 
-namespace RfpProxy.AaMiDe.Media
+namespace RfpProxy.AaMiDe.AaMiDe.Media
 {
     public enum MediaDirection : byte
     {
@@ -17,7 +17,7 @@ namespace RfpProxy.AaMiDe.Media
 
         public byte Padding { get; }
 
-        protected override ReadOnlyMemory<byte> Raw => base.Raw.Slice(2);
+        protected override ReadOnlyMemory<byte> Raw => base.Raw[2..];
 
         public MediaStopMessage(ReadOnlyMemory<byte> data):base(MsgType.MEDIA_STOP, data)
         {

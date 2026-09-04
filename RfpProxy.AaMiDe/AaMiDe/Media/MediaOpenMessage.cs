@@ -2,7 +2,7 @@
 using System.Buffers.Binary;
 using System.IO;
 
-namespace RfpProxy.AaMiDe.Media
+namespace RfpProxy.AaMiDe.AaMiDe.Media
 {
     public sealed class MediaOpenMessage : MediaMessage
     {
@@ -12,14 +12,14 @@ namespace RfpProxy.AaMiDe.Media
 
         public uint Flags { get; }
 
-        protected override ReadOnlyMemory<byte> Raw => base.Raw.Slice(6);
+        protected override ReadOnlyMemory<byte> Raw => base.Raw[6..];
 
         public MediaOpenMessage(ReadOnlyMemory<byte> data) : base(MsgType.MEDIA_OPEN, data)
         {
             var span = base.Raw.Span;
             Codec = span[0];
             SlotCount = span[1];
-            Flags = BinaryPrimitives.ReadUInt32LittleEndian(span.Slice(2));
+            Flags = BinaryPrimitives.ReadUInt32LittleEndian(span[2..]);
         }
 
         public override void Log(TextWriter writer)

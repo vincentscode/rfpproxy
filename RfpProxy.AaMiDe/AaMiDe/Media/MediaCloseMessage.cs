@@ -2,13 +2,13 @@
 using System.Buffers.Binary;
 using System.IO;
 
-namespace RfpProxy.AaMiDe.Media
+namespace RfpProxy.AaMiDe.AaMiDe.Media
 {
     public sealed class MediaCloseMessage : MediaMessage
     {
         public ushort Padding { get; }
 
-        protected override ReadOnlyMemory<byte> Raw => base.Raw.Slice(2);
+        protected override ReadOnlyMemory<byte> Raw => base.Raw[2..];
 
         public MediaCloseMessage(ReadOnlyMemory<byte> data):base(MsgType.MEDIA_CLOSE, data)
         {

@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace RfpProxy.AaMiDe.Mt
+namespace RfpProxy.AaMiDe.AaMiDe.Mt
 {
     public sealed class UnknownDnmMtValue : DnmMtValue
     {

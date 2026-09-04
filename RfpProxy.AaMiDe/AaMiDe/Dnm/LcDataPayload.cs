@@ -1,9 +1,9 @@
 ﻿using System;
 using System.IO;
-using RfpProxy.AaMiDe.Nwk;
+using RfpProxy.AaMiDe.AaMiDe.Nwk;
 using RfpProxyLib;
 
-namespace RfpProxy.AaMiDe.Dnm
+namespace RfpProxy.AaMiDe.AaMiDe.Dnm
 {
     public enum LcCommandType
     {
@@ -103,11 +103,16 @@ namespace RfpProxy.AaMiDe.Dnm
         public override bool HasUnknown => Payload.HasUnknown || (SAPI != 0 && SAPI != 3);
 
         public override byte DataLength { get; }
+
+        public LcDataPayload(byte address, byte control, NwkCCPayload nwkCCPayload) : base(ReadOnlyMemory<byte>.Empty)
+        {
+        }
+
         public LcDataPayload(ReadOnlyMemory<byte> data, NwkReassembler reassembler):base(data)
         {
             var span = base.Raw.Span;
             DataLength = span[0];
-            span = span.Slice(1);
+            span = span[1..];
             Command = (span[0] & 0x2) == 0x2;
             SAPI = (byte) ((span[0] & 0xc) >> 2);
             LLN = (byte) ((span[0] & 0x70) >> 4);
@@ -190,7 +195,7 @@ namespace RfpProxy.AaMiDe.Dnm
             else
             {
                 //TODO parse length until N=1 ETSI EN 300 175-4 V2.4.0 section 7.6
-                payloadData = base.Raw.Slice(5);
+                payloadData = base.Raw[5..];
             }
             if (MoreData)
             {

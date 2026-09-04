@@ -4,41 +4,40 @@ using System.Net.Sockets;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace RfpProxy
+namespace RfpProxy;
+
+public static class PipeHelper
 {
-    public static class PipeHelper
+    public static async Task FillPipeAsync(Socket socket, PipeWriter writer, CancellationToken cancellationToken)
     {
-        public static async Task FillPipeAsync(Socket socket, PipeWriter writer, CancellationToken cancellationToken)
+        try
         {
-            try
+            while (socket.Connected)
             {
-                while (socket.Connected)
-                {
-                    var memory = writer.GetMemory(512);
-                    int bytesRead = await socket.ReceiveAsync(memory, SocketFlags.None, cancellationToken).ConfigureAwait(false);
-                    if (bytesRead == 0)
-                        break;
+                var memory = writer.GetMemory(512);
+                int bytesRead = await socket.ReceiveAsync(memory, SocketFlags.None, cancellationToken).ConfigureAwait(false);
+                if (bytesRead == 0)
+                    break;
 
-                    writer.Advance(bytesRead);
+                writer.Advance(bytesRead);
 
-                    var result = await writer.FlushAsync(cancellationToken).ConfigureAwait(false);
+                var result = await writer.FlushAsync(cancellationToken).ConfigureAwait(false);
 
-                    if (result.IsCompleted)
-                        break;
-                }
-                writer.Complete();
+                if (result.IsCompleted)
+                    break;
             }
-            catch (OperationCanceledException ex)
-            {
-                Console.WriteLine("cancelled in PipeHelper.FillPipeAsync");
-                socket.Close();
-                writer.Complete(ex);
-            }
-            catch (SocketException ex)
-            {
-                socket.Close();
-                writer.Complete(ex);
-            }
+            writer.Complete();
+        }
+        catch (OperationCanceledException ex)
+        {
+            Console.WriteLine("cancelled in PipeHelper.FillPipeAsync");
+            socket.Close();
+            writer.Complete(ex);
+        }
+        catch (SocketException ex)
+        {
+            socket.Close();
+            writer.Complete(ex);
         }
     }
 }

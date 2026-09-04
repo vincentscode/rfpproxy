@@ -2,7 +2,7 @@
 using System.IO;
 using RfpProxyLib;
 
-namespace RfpProxy.AaMiDe.Sys
+namespace RfpProxy.AaMiDe.AaMiDe.Sys
 {
     public sealed class SysAuthenticateMessage : AaMiDeMessage
     {
@@ -16,11 +16,11 @@ namespace RfpProxy.AaMiDe.Sys
 
         public override bool HasUnknown => true;
 
-        protected override ReadOnlyMemory<byte> Raw => base.Raw.Slice(31);
+        protected override ReadOnlyMemory<byte> Raw => base.Raw[31..];
 
         public SysAuthenticateMessage(ReadOnlyMemory<byte> data):base(MsgType.SYS_AUTHENTICATE, data)
         {
-            Reserved1 = base.Raw.Slice(0, 7);
+            Reserved1 = base.Raw[..7];
             RfpIv = base.Raw.Slice(7, 8);
             Reserved2 = base.Raw.Slice(15, 8);
             OmmIv = base.Raw.Slice(23, 8);

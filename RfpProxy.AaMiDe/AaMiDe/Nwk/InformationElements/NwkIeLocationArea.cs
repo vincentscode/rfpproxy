@@ -2,7 +2,7 @@
 using System.IO;
 using RfpProxyLib;
 
-namespace RfpProxy.AaMiDe.Nwk.InformationElements
+namespace RfpProxy.AaMiDe.AaMiDe.Nwk.InformationElements
 {
     public sealed class NwkIeLocationArea : NwkVariableLengthInformationElement
     {
@@ -25,7 +25,7 @@ namespace RfpProxy.AaMiDe.Nwk.InformationElements
                 LocationAreaLevel = (byte) (span[0] & 0x3f);
             if (HasExtendedLocationInformation)
             {
-                Reserved = data.Slice(1);
+                Reserved = data[1..];
             }
         }
 

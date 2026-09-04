@@ -2,7 +2,7 @@
 using System.Buffers.Binary;
 using System.IO;
 
-namespace RfpProxy.AaMiDe
+namespace RfpProxy.AaMiDe.AaMiDe
 {
     public sealed class NackMessage : AaMiDeMessage
     {
@@ -12,14 +12,14 @@ namespace RfpProxy.AaMiDe
 
         public NackReason Reason { get; }
 
-        protected override ReadOnlyMemory<byte> Raw => base.Raw.Slice(8);
+        protected override ReadOnlyMemory<byte> Raw => base.Raw[8..];
 
         public NackMessage(ReadOnlyMemory<byte> data):base(MsgType.NACK, data)
         {
             var span = base.Raw.Span;
             Message = (MsgType) BinaryPrimitives.ReadUInt16BigEndian(span);
-            CallId = BinaryPrimitives.ReadUInt16LittleEndian(span.Slice(2));
-            Reason = (NackReason) BinaryPrimitives.ReadUInt32BigEndian(span.Slice(4));
+            CallId = BinaryPrimitives.ReadUInt16LittleEndian(span[2..]);
+            Reason = (NackReason) BinaryPrimitives.ReadUInt32BigEndian(span[4..]);
         }
 
         public override void Log(TextWriter writer)

@@ -6,7 +6,7 @@ using System.Security.Cryptography;
 using System.Text;
 using RfpProxyLib;
 
-namespace RfpProxy.AaMiDe.Sys
+namespace RfpProxy.AaMiDe.AaMiDe.Sys
 {
     public sealed class SysInitMessage : AaMiDeMessage
     {
@@ -214,7 +214,7 @@ namespace RfpProxy.AaMiDe.Sys
 
         public override bool HasUnknown => true;
 
-        protected override ReadOnlyMemory<byte> Raw => base.Raw.Slice(Protocol > 0x080000?0x110:0xF4);
+        protected override ReadOnlyMemory<byte> Raw => base.Raw[(Protocol > 0x080000?0x110:0xF4)..];
 
         public override ushort Length => (ushort) (base.Length + 0x110u);
 
@@ -235,7 +235,7 @@ namespace RfpProxy.AaMiDe.Sys
             Reserved1 = base.Raw.Slice(0x04, 0x04);//protocol?
             Mac = new PhysicalAddress(base.Raw.Slice(0x08, 0x06).ToArray());
             Reserved2 = base.Raw.Slice(0x0e, 0x06);
-            Capabilities = (RfpCapabilities) BinaryPrimitives.ReadUInt32BigEndian(base.Raw.Slice(0x14).Span);
+            Capabilities = (RfpCapabilities) BinaryPrimitives.ReadUInt32BigEndian(base.Raw[0x14..].Span);
             Crypted = base.Raw.Slice(0x18, 0x40).ToArray();
             Protocol = BinaryPrimitives.ReadUInt32BigEndian(base.Raw.Slice(0x58, 0x04).Span);
             Reserved4 = base.Raw.Slice(0x5c, 0x08);
@@ -245,12 +245,12 @@ namespace RfpProxy.AaMiDe.Sys
 
             var plain = Plain.AsSpan();
             Magic = BinaryPrimitives.ReadUInt64BigEndian(plain);
-            plain = plain.Slice(8);
-            Mac2 = new PhysicalAddress(plain.Slice(0, 6).ToArray());
-            plain = plain.Slice(6);
+            plain = plain[8..];
+            Mac2 = new PhysicalAddress(plain[..6].ToArray());
+            plain = plain[6..];
             Branding = (RfpBranding) (BinaryPrimitives.ReadUInt16LittleEndian(plain) & 0x3ffu);
             Reserved3 = Plain.AsMemory().Slice(16, 44);
-            Crc32 = BinaryPrimitives.ReadUInt32BigEndian(Plain.AsSpan().Slice(60));
+            Crc32 = BinaryPrimitives.ReadUInt32BigEndian(Plain.AsSpan()[60..]);
 
             int offset = 0x64;
             int length = 0x80;
@@ -268,30 +268,30 @@ namespace RfpProxy.AaMiDe.Sys
         {
             data =  base.Serialize(data);
             BinaryPrimitives.WriteInt32BigEndian(data, (int) Hardware);
-            Reserved1.Span.CopyTo(data.Slice(4));
-            Mac.GetAddressBytes().CopyTo(data.Slice(0x08));
-            BinaryPrimitives.WriteUInt32BigEndian(data.Slice(0x14), (uint) Capabilities);
+            Reserved1.Span.CopyTo(data[4..]);
+            Mac.GetAddressBytes().CopyTo(data[0x08..]);
+            BinaryPrimitives.WriteUInt32BigEndian(data[0x14..], (uint) Capabilities);
 
             Plain = new byte[0x40];
             var plain = Plain.AsSpan();
             BinaryPrimitives.WriteUInt64BigEndian(plain, Magic);
-            Mac2.GetAddressBytes().CopyTo(plain.Slice(8));
-            BinaryPrimitives.WriteUInt16LittleEndian(plain.Slice(14), (ushort)Branding);
-            Crc32 = CalculateCrc32(plain.Slice(0, 60));
-            BinaryPrimitives.WriteUInt32BigEndian(plain.Slice(60), Crc32);
+            Mac2.GetAddressBytes().CopyTo(plain[8..]);
+            BinaryPrimitives.WriteUInt16LittleEndian(plain[14..], (ushort)Branding);
+            Crc32 = CalculateCrc32(plain[..60]);
+            BinaryPrimitives.WriteUInt32BigEndian(plain[60..], Crc32);
             Crypted = new byte[0x40];
             AesEncrypt();
-            Crypted.CopyTo(data.Slice(0x18));
+            Crypted.CopyTo(data[0x18..]);
 
-            BinaryPrimitives.WriteUInt32BigEndian(data.Slice(0x58), Protocol);
-            Encoding.ASCII.GetBytes(SwVersion).CopyTo(data.Slice(0x70));
-            Signature.Span.CopyTo(data.Slice(0x100));
-            return data.Slice(0x110);
+            BinaryPrimitives.WriteUInt32BigEndian(data[0x58..], Protocol);
+            Encoding.ASCII.GetBytes(SwVersion).CopyTo(data[0x70..]);
+            Signature.Span.CopyTo(data[0x100..]);
+            return data[0x110..];
         }
 
         public void Sign(ReadOnlySpan<byte> sysAuth)
         {
-            sysAuth = sysAuth.Slice(4);
+            sysAuth = sysAuth[4..];
             using (var md5 = MD5.Create())
             {
                 var data = new byte[sysAuth.Length + Length - 0x10 + _signatureKey.Length];

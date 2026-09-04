@@ -1,7 +1,7 @@
 ﻿using System;
 using System.IO;
 
-namespace RfpProxy.AaMiDe.Nwk.InformationElements.Proprietary.DeTeWe
+namespace RfpProxy.AaMiDe.AaMiDe.Nwk.InformationElements.Proprietary.DeTeWe
 {
     public class LanguageDeTeWeElement : DeTeWeElement
     {
@@ -28,7 +28,7 @@ namespace RfpProxy.AaMiDe.Nwk.InformationElements.Proprietary.DeTeWe
 
         public LanguageCode Language { get; }
 
-        public override ReadOnlyMemory<byte> Raw => base.Raw.Slice(1);
+        public override ReadOnlyMemory<byte> Raw => base.Raw[1..];
 
         public LanguageDeTeWeElement(ReadOnlyMemory<byte> data):base(DeTeWeType.Language, data)
         {

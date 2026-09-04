@@ -2,7 +2,7 @@
 using System.IO;
 using RfpProxyLib;
 
-namespace RfpProxy.AaMiDe.Nwk.InformationElements
+namespace RfpProxy.AaMiDe.AaMiDe.Nwk.InformationElements
 {
     public sealed class NwkIeFixedIdentity : NwkVariableLengthInformationElement
     {
@@ -26,7 +26,7 @@ namespace RfpProxy.AaMiDe.Nwk.InformationElements
             IdentityType = (FixedIdentityType) span[0];
             var length = (span[1] & 0x7f) / 8;
             Identity = data.Slice(2, length);
-            Raw = data.Slice(2).Slice(length);
+            Raw = data[2..][length..];
         }
 
         public override void Log(TextWriter writer)

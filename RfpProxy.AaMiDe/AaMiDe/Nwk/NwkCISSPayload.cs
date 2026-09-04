@@ -1,12 +1,12 @@
 ﻿using System;
 
-namespace RfpProxy.AaMiDe.Nwk
+namespace RfpProxy.AaMiDe.AaMiDe.Nwk
 {
     public class NwkCISSPayload : NwkSFormatPayload
     {
         public NwkCISSMessageType Type { get; }
 
-        public NwkCISSPayload(byte ti, bool f, ReadOnlyMemory<byte> data) : base(NwkProtocolDiscriminator.CISS, ti, f, data.Slice(1))
+        public NwkCISSPayload(byte ti, bool f, ReadOnlyMemory<byte> data) : base(NwkProtocolDiscriminator.CISS, ti, f, data[1..])
         {
             Type = (NwkCISSMessageType) data.Span[0];
             switch (Type)

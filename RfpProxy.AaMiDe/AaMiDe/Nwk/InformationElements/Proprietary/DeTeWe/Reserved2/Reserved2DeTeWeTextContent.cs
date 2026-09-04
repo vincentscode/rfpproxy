@@ -2,7 +2,7 @@
 using System.IO;
 using System.Text;
 
-namespace RfpProxy.AaMiDe.Nwk.InformationElements.Proprietary.DeTeWe.Reserved2
+namespace RfpProxy.AaMiDe.AaMiDe.Nwk.InformationElements.Proprietary.DeTeWe.Reserved2
 {
     public class Reserved2DeTeWeTextContent : Reserved2DeTeWeContent
     {

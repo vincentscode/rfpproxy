@@ -2,7 +2,7 @@
 using System.IO;
 using RfpProxyLib;
 
-namespace RfpProxy.AaMiDe.Sys
+namespace RfpProxy.AaMiDe.AaMiDe.Sys
 {
     public sealed class SysPasswdMessage : AaMiDeMessage
     {
@@ -21,7 +21,7 @@ namespace RfpProxy.AaMiDe.Sys
         /// <summary>
         /// padding
         /// </summary>
-        protected override ReadOnlyMemory<byte> Raw => base.Raw.Slice(0x106);
+        protected override ReadOnlyMemory<byte> Raw => base.Raw[0x106..];
 
         public override bool HasUnknown => false;
 

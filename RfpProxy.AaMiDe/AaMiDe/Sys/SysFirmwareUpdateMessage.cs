@@ -2,7 +2,7 @@
 using System.IO;
 using RfpProxyLib;
 
-namespace RfpProxy.AaMiDe.Sys
+namespace RfpProxy.AaMiDe.AaMiDe.Sys
 {
     public sealed class SysFirmwareUpdateMessage : AaMiDeMessage
     {
@@ -27,8 +27,8 @@ namespace RfpProxy.AaMiDe.Sys
         public SysFirmwareUpdateMessage(ReadOnlyMemory<byte> data):base(MsgType.SYS_FIRMWARE_UPDATE, data)
         {
             Raw = base.Raw;
-            Reserved1 = Raw.Slice(0, 8);
-            Raw = Raw.Slice(8);
+            Reserved1 = Raw[..8];
+            Raw = Raw[8..];
             while (!Raw.IsEmpty)
             {
                 var type = Raw.Span[0];
@@ -60,7 +60,7 @@ namespace RfpProxy.AaMiDe.Sys
                     default:
                         return;
                 }
-                Raw = Raw.Slice(2).Slice(length);
+                Raw = Raw[2..][length..];
             }
         }
 

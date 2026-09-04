@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace RfpProxy.AaMiDe.Sync
+namespace RfpProxy.AaMiDe.AaMiDe.Sync
 {
     public sealed class GetReqRssiCompCfmSyncMessage : SyncMessage
     {

@@ -3,7 +3,7 @@ using System.Buffers.Binary;
 using System.IO;
 using RfpProxyLib;
 
-namespace RfpProxy.AaMiDe.Media
+namespace RfpProxy.AaMiDe.AaMiDe.Media
 {
     public sealed class MediaStartMessage : MediaMessage
     {
@@ -17,14 +17,14 @@ namespace RfpProxy.AaMiDe.Media
 
         public ReadOnlyMemory<byte> Padding2 { get; }
 
-        protected override ReadOnlyMemory<byte> Raw => base.Raw.Slice(10);
+        protected override ReadOnlyMemory<byte> Raw => base.Raw[10..];
 
         public MediaStartMessage(ReadOnlyMemory<byte> data) : base(MsgType.MEDIA_START, data)
         {
             var span = base.Raw.Span;
             Direction = (MediaDirection)span[0];
             Padding1 = span[1];
-            Time = BinaryPrimitives.ReadUInt32LittleEndian(span.Slice(2));
+            Time = BinaryPrimitives.ReadUInt32LittleEndian(span[2..]);
             MetKeepAlive = span[6];
             Padding2 = base.Raw.Slice(7, 3);
         }

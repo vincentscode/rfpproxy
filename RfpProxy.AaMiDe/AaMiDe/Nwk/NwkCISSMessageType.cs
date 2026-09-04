@@ -1,4 +1,4 @@
-﻿namespace RfpProxy.AaMiDe.Nwk
+﻿namespace RfpProxy.AaMiDe.AaMiDe.Nwk
 {
     public enum NwkCISSMessageType : byte
     {

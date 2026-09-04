@@ -2,7 +2,7 @@ using System;
 using System.Buffers.Binary;
 using System.IO;
 
-namespace RfpProxy.AaMiDe.Nwk
+namespace RfpProxy.AaMiDe.AaMiDe.Nwk
 {
     public sealed class NwkCLMSFixedDataPlayload : NwkCLMSFixedPayload
     {
@@ -15,7 +15,7 @@ namespace RfpProxy.AaMiDe.Nwk
         public NwkCLMSFixedDataPlayload(byte ti, bool f, ReadOnlyMemory<byte> data) : base(ti, f)
         {
             Section = (byte) (data.Span[0] & 0x7);
-            Data = BinaryPrimitives.ReadUInt32BigEndian(data.Span.Slice(1));
+            Data = BinaryPrimitives.ReadUInt32BigEndian(data.Span[1..]);
         }
 
         public override void Log(TextWriter writer)

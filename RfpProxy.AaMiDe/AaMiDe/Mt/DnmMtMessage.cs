@@ -2,9 +2,9 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using RfpProxy.AaMiDe.Dnm;
+using RfpProxy.AaMiDe.AaMiDe.Dnm;
 
-namespace RfpProxy.AaMiDe.Mt
+namespace RfpProxy.AaMiDe.AaMiDe.Mt
 {
     public enum DnmMtType : byte
     {
@@ -33,14 +33,14 @@ namespace RfpProxy.AaMiDe.Mt
             DnmType = (DnmMtType) span[1];
             Values = new List<DnmMtValue>();
 
-            var payload = base.Raw.Slice(2);
+            var payload = base.Raw[2..];
             while (payload.Length > 0)
             {
                 var key = (MtKey) payload.Span[0];
                 var length = payload.Span[1];
                 var value = payload.Slice(2, length);
                 Values.Add(DnmMtValue.Create(key, value));
-                payload = payload.Slice(2).Slice(length);
+                payload = payload[2..][length..];
             }
             Raw = payload;
         }

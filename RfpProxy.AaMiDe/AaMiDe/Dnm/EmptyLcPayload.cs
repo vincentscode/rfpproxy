@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace RfpProxy.AaMiDe.Dnm
+namespace RfpProxy.AaMiDe.AaMiDe.Dnm
 {
     public sealed class EmptyLcPayload : LcPayload
     {

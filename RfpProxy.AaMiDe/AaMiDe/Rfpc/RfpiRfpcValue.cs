@@ -3,7 +3,7 @@ using System.Buffers.Binary;
 using System.IO;
 using RfpProxyLib;
 
-namespace RfpProxy.AaMiDe.Rfpc
+namespace RfpProxy.AaMiDe.AaMiDe.Rfpc
 {
     public sealed class RfpiRfpcValue : DnmRfpcValue
     {
@@ -36,7 +36,7 @@ namespace RfpProxy.AaMiDe.Rfpc
                 switch (ariClass)
                 {
                     case AriClass.B:
-                        return new AriB(data.Slice(0,4));
+                        return new AriB(data[..4]);
                     case AriClass.A:
                     case AriClass.C:
                     case AriClass.D:
@@ -68,7 +68,7 @@ namespace RfpProxy.AaMiDe.Rfpc
             public AriB(ReadOnlyMemory<byte> data):base(AriClass.B)
             {
                 var span = data.Span;
-                Eic = (ushort) ((BinaryPrimitives.ReadUInt16BigEndian(span.Slice(1)) >> 4) | ((span[0] & 0x0f) << 12));
+                Eic = (ushort) ((BinaryPrimitives.ReadUInt16BigEndian(span[1..]) >> 4) | ((span[0] & 0x0f) << 12));
                 Fpn = (byte) (((span[2] & 0x0f) << 4) | ((span[3] & 0xf0) >> 4));
                 Fps = (byte) (span[3] & 0x0f);
             }
@@ -88,7 +88,7 @@ namespace RfpProxy.AaMiDe.Rfpc
 
         public ReadOnlyMemory<byte> Pari { get; }
 
-        public override ReadOnlyMemory<byte> Raw => base.Raw.Slice(5);
+        public override ReadOnlyMemory<byte> Raw => base.Raw[5..];
 
         public RfpiRfpcValue(ReadOnlyMemory<byte> data):base(RfpcKey.RFPI, data)
         {
@@ -103,7 +103,7 @@ namespace RfpProxy.AaMiDe.Rfpc
             else
             {
                 Rpn = span[4];
-                Pari = data.Slice(0, 4);
+                Pari = data[..4];
             }
         }
 

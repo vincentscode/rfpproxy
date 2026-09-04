@@ -1,7 +1,7 @@
 ﻿using System;
 using System.IO;
 
-namespace RfpProxy.AaMiDe.Dnm
+namespace RfpProxy.AaMiDe.AaMiDe.Dnm
 {
     public abstract class LcPayload : DnmPayload
     {
@@ -33,7 +33,7 @@ namespace RfpProxy.AaMiDe.Dnm
             {
                 if (base.Raw.Length < 2)
                     return Array.Empty<byte>();
-                return base.Raw.Slice(1);
+                return base.Raw[1..];
             }
         }
 

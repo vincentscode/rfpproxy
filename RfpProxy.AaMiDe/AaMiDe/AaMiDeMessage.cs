@@ -1,19 +1,19 @@
 ﻿using System;
 using System.Buffers.Binary;
 using System.IO;
-using RfpProxy.AaMiDe.Media;
-using RfpProxy.AaMiDe.Sys;
-using RfpProxy.AaMiDe.Sync;
-using RfpProxy.AaMiDe.Dnm;
+using RfpProxy.AaMiDe.AaMiDe.Dnm;
+using RfpProxy.AaMiDe.AaMiDe.Media;
+using RfpProxy.AaMiDe.AaMiDe.Sync;
+using RfpProxy.AaMiDe.AaMiDe.Sys;
 using RfpProxyLib;
 
-namespace RfpProxy.AaMiDe
+namespace RfpProxy.AaMiDe.AaMiDe
 {
     public abstract class AaMiDeMessage
     {
         private readonly ushort _length;
 
-        public int MessageLength => _length + 4;
+        public virtual int MessageLength => _length + 4;
 
         public virtual ushort Length => 4;
 
@@ -21,6 +21,14 @@ namespace RfpProxy.AaMiDe
 
         public MsgType Type { get; }
 
+        /// <summary>
+        /// Raw data for inheritors.
+        /// Used to pass unprocessed data to handle the inherotor-specific parts.
+        /// Generally each layer of inheritance forwards the unprocessed tail of the raw data from the prior layer.
+        /// </summary>
+        /// <remarks>
+        /// This is NOT usable for serialization. It can only be used for construction and is ugly at that as well.
+        /// </remarks>
         protected virtual ReadOnlyMemory<byte> Raw { get; }
 
         protected AaMiDeMessage(MsgType type)
@@ -29,16 +37,16 @@ namespace RfpProxy.AaMiDe
             Raw = ReadOnlyMemory<byte>.Empty;
         }
 
-        protected AaMiDeMessage(MsgType type, ReadOnlyMemory<byte> data):this(type)
+        protected AaMiDeMessage(MsgType type, ReadOnlyMemory<byte> data) : this(type)
         {
             var span = data.Span;
-            _length = BinaryPrimitives.ReadUInt16BigEndian(span.Slice(2));
+            _length = BinaryPrimitives.ReadUInt16BigEndian(span[2..]);
             Raw = data.Slice(4, _length);
         }
 
         public static AaMiDeMessage Create(ReadOnlyMemory<byte> data, RfpConnectionTracker reassembler)
         {
-            var type = (MsgType)BinaryPrimitives.ReadUInt16BigEndian(data.Slice(0, 2).Span);
+            var type = (MsgType)BinaryPrimitives.ReadUInt16BigEndian(data[..2].Span);
             switch (type)
             {
                 case MsgType.SYS_LED:
@@ -141,8 +149,8 @@ namespace RfpProxy.AaMiDe
         public virtual Span<byte> Serialize(Span<byte> data)
         {
             BinaryPrimitives.WriteUInt16BigEndian(data, (ushort) Type);
-            BinaryPrimitives.WriteUInt16BigEndian(data.Slice(2), (ushort) (Length - 4));
-            return data.Slice(4);
+            BinaryPrimitives.WriteUInt16BigEndian(data[2..], (ushort) (Length - 4));
+            return data[4..];
         }
     }
 }

@@ -2,7 +2,7 @@
 using System.IO;
 using RfpProxyLib;
 
-namespace RfpProxy.AaMiDe.Nwk.InformationElements
+namespace RfpProxy.AaMiDe.AaMiDe.Nwk.InformationElements
 {
     public sealed class NwkIeFacility : NwkVariableLengthInformationElement
     {
@@ -19,7 +19,7 @@ namespace RfpProxy.AaMiDe.Nwk.InformationElements
         {
             var span = data.Span;
             HasValidServiceDiscriminator = span[0] == 0x91;
-            Components = data.Slice(1);
+            Components = data[1..];
         }
 
         public override void Log(TextWriter writer)

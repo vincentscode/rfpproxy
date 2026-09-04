@@ -2,13 +2,13 @@
 using System.Buffers.Binary;
 using System.IO;
 
-namespace RfpProxy.AaMiDe.Rfpc
+namespace RfpProxy.AaMiDe.AaMiDe.Rfpc
 {
     public sealed class StatisticDataResetRfpcValue : DnmRfpcValue
     {
         public bool Reset { get; }
 
-        public override ReadOnlyMemory<byte> Raw => base.Raw.Slice(4);
+        public override ReadOnlyMemory<byte> Raw => base.Raw[4..];
 
         public StatisticDataResetRfpcValue(ReadOnlyMemory<byte> data):base(RfpcKey.StatisticDataReset, data)
         {

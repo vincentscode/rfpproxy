@@ -2,7 +2,7 @@
 using System.IO;
 using RfpProxyLib;
 
-namespace RfpProxy.AaMiDe.Mt
+namespace RfpProxy.AaMiDe.AaMiDe.Mt
 {
     public abstract class DnmMtValue
     {

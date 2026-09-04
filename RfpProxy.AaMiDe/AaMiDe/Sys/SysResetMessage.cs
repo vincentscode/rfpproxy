@@ -1,13 +1,13 @@
 ﻿using System;
 using System.IO;
 
-namespace RfpProxy.AaMiDe.Sys
+namespace RfpProxy.AaMiDe.AaMiDe.Sys
 {
     public sealed class SysResetMessage : AaMiDeMessage
     {
         public ResetType Reset { get; }
 
-        protected override ReadOnlyMemory<byte> Raw => base.Raw.Slice(1);
+        protected override ReadOnlyMemory<byte> Raw => base.Raw[1..];
 
         public SysResetMessage(ReadOnlyMemory<byte> data):base(MsgType.SYS_RESET, data)
         {

@@ -1,7 +1,7 @@
 ﻿using System;
 using System.IO;
 
-namespace RfpProxy.AaMiDe.Sys
+namespace RfpProxy.AaMiDe.AaMiDe.Sys
 {
     public sealed class SysMaxChannelsMessage : AaMiDeMessage
     {
@@ -9,7 +9,7 @@ namespace RfpProxy.AaMiDe.Sys
 
         public byte Sessions { get; }
 
-        protected override ReadOnlyMemory<byte> Raw => base.Raw.Slice(2);
+        protected override ReadOnlyMemory<byte> Raw => base.Raw[2..];
 
         public SysMaxChannelsMessage(ReadOnlyMemory<byte> data):base(MsgType.SYS_MAX_CHANNELS, data)
         {

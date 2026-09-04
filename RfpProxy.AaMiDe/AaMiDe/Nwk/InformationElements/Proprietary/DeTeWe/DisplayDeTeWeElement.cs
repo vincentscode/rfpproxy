@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Text;
 
-namespace RfpProxy.AaMiDe.Nwk.InformationElements.Proprietary.DeTeWe
+namespace RfpProxy.AaMiDe.AaMiDe.Nwk.InformationElements.Proprietary.DeTeWe
 {
     public class DisplayDeTeWeElement : DeTeWeElement
     {
@@ -41,14 +41,14 @@ namespace RfpProxy.AaMiDe.Nwk.InformationElements.Proprietary.DeTeWe
                 return;
             }
             Padding = data.Span[1];
-            data = data.Slice(2);
+            data = data[2..];
             Values = new List<string>();
             while (data.Length > 0)
             {
                 var length = data.Span[0];
                 var value = data.Slice(1, length);
                 Values.Add(Encoding.UTF8.GetString(value.Span));
-                data = data.Slice(1).Slice(length);
+                data = data[1..][length..];
             }
         }
 

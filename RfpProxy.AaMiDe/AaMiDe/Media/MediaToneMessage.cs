@@ -2,7 +2,7 @@
 using System.Buffers.Binary;
 using System.IO;
 
-namespace RfpProxy.AaMiDe.Media
+namespace RfpProxy.AaMiDe.AaMiDe.Media
 {
     public sealed class MediaToneMessage : MediaMessage
     {
@@ -78,17 +78,17 @@ namespace RfpProxy.AaMiDe.Media
                 if (data.Length != 24)
                     throw new ArgumentOutOfRangeException(nameof(data));
                 Frequency1 = BinaryPrimitives.ReadUInt16LittleEndian(data);
-                Frequency2 = BinaryPrimitives.ReadUInt16LittleEndian(data.Slice(2));
-                Frequency3 = BinaryPrimitives.ReadUInt16LittleEndian(data.Slice(4));
-                Frequency4 = BinaryPrimitives.ReadUInt16LittleEndian(data.Slice(6));
-                CB1 = BinaryPrimitives.ReadInt16LittleEndian(data.Slice(8));
-                CB2 = BinaryPrimitives.ReadInt16LittleEndian(data.Slice(10));
-                CB3 = BinaryPrimitives.ReadInt16LittleEndian(data.Slice(12));
-                CB4 = BinaryPrimitives.ReadInt16LittleEndian(data.Slice(14));
-                Duration = BinaryPrimitives.ReadUInt16LittleEndian(data.Slice(16));
-                CycleCount = BinaryPrimitives.ReadUInt16LittleEndian(data.Slice(18));
-                CycleTo = BinaryPrimitives.ReadUInt16LittleEndian(data.Slice(20));
-                Next = BinaryPrimitives.ReadUInt16LittleEndian(data.Slice(22));
+                Frequency2 = BinaryPrimitives.ReadUInt16LittleEndian(data[2..]);
+                Frequency3 = BinaryPrimitives.ReadUInt16LittleEndian(data[4..]);
+                Frequency4 = BinaryPrimitives.ReadUInt16LittleEndian(data[6..]);
+                CB1 = BinaryPrimitives.ReadInt16LittleEndian(data[8..]);
+                CB2 = BinaryPrimitives.ReadInt16LittleEndian(data[10..]);
+                CB3 = BinaryPrimitives.ReadInt16LittleEndian(data[12..]);
+                CB4 = BinaryPrimitives.ReadInt16LittleEndian(data[14..]);
+                Duration = BinaryPrimitives.ReadUInt16LittleEndian(data[16..]);
+                CycleCount = BinaryPrimitives.ReadUInt16LittleEndian(data[18..]);
+                CycleTo = BinaryPrimitives.ReadUInt16LittleEndian(data[20..]);
+                Next = BinaryPrimitives.ReadUInt16LittleEndian(data[22..]);
             }
 
             public void Log(TextWriter writer)
@@ -103,18 +103,18 @@ namespace RfpProxy.AaMiDe.Media
             public Span<byte> Serialize(Span<byte> data)
             {
                  BinaryPrimitives.WriteUInt16LittleEndian(data, Frequency1);
-                 BinaryPrimitives.WriteUInt16LittleEndian(data.Slice(2), Frequency2);
-                 BinaryPrimitives.WriteUInt16LittleEndian(data.Slice(4), Frequency3);
-                 BinaryPrimitives.WriteUInt16LittleEndian(data.Slice(6), Frequency4);
-                 BinaryPrimitives.WriteInt16LittleEndian(data.Slice(8), CB1);
-                 BinaryPrimitives.WriteInt16LittleEndian(data.Slice(10), CB2);
-                 BinaryPrimitives.WriteInt16LittleEndian(data.Slice(12), CB3);
-                 BinaryPrimitives.WriteInt16LittleEndian(data.Slice(14), CB4);
-                 BinaryPrimitives.WriteUInt16LittleEndian(data.Slice(16), Duration);
-                 BinaryPrimitives.WriteUInt16LittleEndian(data.Slice(18), CycleCount);
-                 BinaryPrimitives.WriteUInt16LittleEndian(data.Slice(20), CycleTo);
-                 BinaryPrimitives.WriteUInt16LittleEndian(data.Slice(22), Next);
-                 return data.Slice(24);
+                 BinaryPrimitives.WriteUInt16LittleEndian(data[2..], Frequency2);
+                 BinaryPrimitives.WriteUInt16LittleEndian(data[4..], Frequency3);
+                 BinaryPrimitives.WriteUInt16LittleEndian(data[6..], Frequency4);
+                 BinaryPrimitives.WriteInt16LittleEndian(data[8..], CB1);
+                 BinaryPrimitives.WriteInt16LittleEndian(data[10..], CB2);
+                 BinaryPrimitives.WriteInt16LittleEndian(data[12..], CB3);
+                 BinaryPrimitives.WriteInt16LittleEndian(data[14..], CB4);
+                 BinaryPrimitives.WriteUInt16LittleEndian(data[16..], Duration);
+                 BinaryPrimitives.WriteUInt16LittleEndian(data[18..], CycleCount);
+                 BinaryPrimitives.WriteUInt16LittleEndian(data[20..], CycleTo);
+                 BinaryPrimitives.WriteUInt16LittleEndian(data[22..], Next);
+                 return data[24..];
             }
         }
 
@@ -124,7 +124,7 @@ namespace RfpProxy.AaMiDe.Media
 
         public Tone[] Tones { get; }
 
-        protected override ReadOnlyMemory<byte> Raw => base.Raw.Slice(6).Slice(Tones.Length*24);
+        protected override ReadOnlyMemory<byte> Raw => base.Raw[6..][(Tones.Length*24)..];
 
         public override ushort Length => (ushort) (base.Length + 6 + Tones.Length * 24);
 
@@ -142,13 +142,13 @@ namespace RfpProxy.AaMiDe.Media
             var span = base.Raw.Span;
             Direction = (MediaDirection)span[0];
             var count = span[1];
-            Offset = BinaryPrimitives.ReadUInt32LittleEndian(span.Slice(2));
-            span = span.Slice(6);
+            Offset = BinaryPrimitives.ReadUInt32LittleEndian(span[2..]);
+            span = span[6..];
             Tones = new Tone[count];
             for (int i = 0; i < Tones.Length; i++)
             {
-                Tones[i] = new Tone(span.Slice(0, 24));
-                span = span.Slice(24);
+                Tones[i] = new Tone(span[..24]);
+                span = span[24..];
             }
         }
 
@@ -172,8 +172,8 @@ namespace RfpProxy.AaMiDe.Media
             data = base.Serialize(data);
             data[0] = (byte) Direction;
             data[1] = (byte) Tones.Length;
-            BinaryPrimitives.WriteUInt32LittleEndian(data.Slice(2), Offset);
-            data = data.Slice(6);
+            BinaryPrimitives.WriteUInt32LittleEndian(data[2..], Offset);
+            data = data[6..];
             foreach (var tone in Tones)
             {
                 data = tone.Serialize(data);

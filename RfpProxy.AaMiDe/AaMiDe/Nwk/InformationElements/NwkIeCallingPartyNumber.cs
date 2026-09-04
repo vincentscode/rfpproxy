@@ -2,7 +2,7 @@
 using System.IO;
 using System.Text;
 
-namespace RfpProxy.AaMiDe.Nwk.InformationElements
+namespace RfpProxy.AaMiDe.AaMiDe.Nwk.InformationElements
 {
     public sealed class NwkIeCallingPartyNumber : NwkVariableLengthInformationElement
     {
@@ -71,9 +71,9 @@ namespace RfpProxy.AaMiDe.Nwk.InformationElements
                 Has3a = true;
                 Presentation = (PresentIndicator) ((span[1] & 0x60) >> 5);
                 Screening = (ScreeningIndicator) (span[1] & 0x03);
-                data = data.Slice(1);
+                data = data[1..];
             }
-            Number = data.Slice(1);
+            Number = data[1..];
         }
 
         public override void Log(TextWriter writer)

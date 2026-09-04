@@ -2,7 +2,7 @@
 using System.IO;
 using RfpProxyLib;
 
-namespace RfpProxy.AaMiDe.Nwk.InformationElements.Proprietary.Aastra
+namespace RfpProxy.AaMiDe.AaMiDe.Nwk.InformationElements.Proprietary.Aastra
 {
     public class UnknownAastraElement : AastraElement
     {
@@ -34,14 +34,14 @@ namespace RfpProxy.AaMiDe.Nwk.InformationElements.Proprietary.Aastra
         public FirmwareAastraElement(ReadOnlyMemory<byte> data)
         {
             var length = data.Span[0];
-            data = data.Slice(1);
-            Text1 = data.Slice(0, length).Span.CString();
-            data = data.Slice(length);
+            data = data[1..];
+            Text1 = data[..length].Span.CString();
+            data = data[length..];
             
             length = data.Span[0];
-            data = data.Slice(1);
-            Text2 = data.Slice(0, length).Span.CString();
-            Raw = data.Slice(length);
+            data = data[1..];
+            Text2 = data[..length].Span.CString();
+            Raw = data[length..];
         }
 
         public override void Log(TextWriter writer)
@@ -63,9 +63,9 @@ namespace RfpProxy.AaMiDe.Nwk.InformationElements.Proprietary.Aastra
         public Firmware2AastraElement(ReadOnlyMemory<byte> data)
         {
             var length = data.Span[0];
-            data = data.Slice(1);
-            Text = data.Slice(0, length).Span.CString();
-            Raw = data.Slice(length);
+            data = data[1..];
+            Text = data[..length].Span.CString();
+            Raw = data[length..];
         }
 
         public override void Log(TextWriter writer)

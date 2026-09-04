@@ -1,10 +1,10 @@
 ﻿using System;
 using System.Buffers.Binary;
 using System.IO;
-using RfpProxy.AaMiDe.Dnm;
+using RfpProxy.AaMiDe.AaMiDe.Dnm;
 using RfpProxyLib;
 
-namespace RfpProxy.AaMiDe.Mac
+namespace RfpProxy.AaMiDe.AaMiDe.Mac
 {
     public sealed class MacConIndPayload : DnmPayload
     {
@@ -25,9 +25,9 @@ namespace RfpProxy.AaMiDe.Mac
         public MacConIndPayload(ReadOnlyMemory<byte> data) : base(data)
         {
             var span = data.Span;
-            PMID = (uint) (((span[0] & 0xf) << 16) | BinaryPrimitives.ReadUInt16BigEndian(span.Slice(1)));
+            PMID = (uint) (((span[0] & 0xf) << 16) | BinaryPrimitives.ReadUInt16BigEndian(span[1..]));
             Ho = (span[3] & 0b0000_0010) != 0;
-            Reserved = data.Slice(4);
+            Reserved = data[4..];
         }
         
         public override void Log(TextWriter writer)

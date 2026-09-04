@@ -1,7 +1,7 @@
 ﻿using System;
 using System.IO;
 
-namespace RfpProxy.AaMiDe.Nwk.InformationElements.Proprietary
+namespace RfpProxy.AaMiDe.AaMiDe.Nwk.InformationElements.Proprietary
 {
     public abstract class NwkIeProprietaryContent
     {

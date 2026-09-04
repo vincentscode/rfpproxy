@@ -18,11 +18,13 @@ namespace RfpProxyLib
         {
             _header = header;
             _indexed = new Dictionary<string, int>();
-            for (int i = 1; i < header.Length; i++)
+            for (var i = 1; i < header.Length; i++)
             {
                 header[i] = header[i].TrimEnd();
                 if (!_indexed.ContainsKey(header[i]))
+                {
                     _indexed.Add(header[i], i-1);
+                }
             }
         }
 
@@ -55,24 +57,17 @@ namespace RfpProxyLib
 
         public string Type => _values[0];
 
-        public string this[string field]
-        {
-            get
-            {
-                if (!_header.TryIndexOf(field, out var i)) return null;
-                return this[i].Trim();
-            }
-        }
+        public string this[string field] => !_header.TryIndexOf(field, out var i) ? null : this[i].Trim();
 
         public string this[int i] => _values[i + 1].Trim();
 
         public override string ToString()
         {
-            return $"{Type}: " + String.Join(", ", _values.Skip(1).Select((x, i) => $"{_header.NameOf(i)}:{this[i]}"));
+            return $"{Type}: " + string.Join(", ", _values.Skip(1).Select((x, i) => $"{_header.NameOf(i)}:{this[i]}"));
         }
     }
 
-    public class OmmConfReader:IDisposable
+    public class OmmConfReader : IDisposable
     {
         private static readonly byte[] HiddenMd5Data = {
             0x16, 0xFF, 0x50, 1, 0x13, 0xC0, 0x73, 0x34, 0x93,
@@ -93,7 +88,7 @@ namespace RfpProxyLib
         private readonly Stream _config;
         private readonly Dictionary<string, List<OmmConfEntry>> _sections;
 
-        public OmmConfReader(string filename):this(File.Open(filename, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
+        public OmmConfReader(string filename) : this(File.Open(filename, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
         {
         }
 
@@ -116,46 +111,45 @@ namespace RfpProxyLib
         public async Task ParseAsync(CancellationToken cancellation)
         {
             _disposed = true;
-            using (var sr = new StreamReader(_config, Encoding.UTF8))
-            using (var md5 = MD5.Create())
+            using var sr = new StreamReader(_config, Encoding.UTF8);
+            using var md5 = MD5.Create();
+            
+            md5.TransformBlock(ByteOrderMark, 0, ByteOrderMark.Length, null, 0);
+            string previous = null;
+            OmmConfHeader header = null;
+            while (!sr.EndOfStream)
             {
-                md5.TransformBlock(ByteOrderMark, 0, ByteOrderMark.Length, null, 0);
-                string previous = null;
-                OmmConfHeader header = null;
-                while (!sr.EndOfStream)
+                var current = await sr.ReadLineAsync().ConfigureAwait(false);
+                if (current.Length == 0)
                 {
-                    var current = await sr.ReadLineAsync().ConfigureAwait(false);
-                    if (current.Length == 0)
-                    {
-                        //new section
-                        header = null;
-                    }
-                    else if (current.AsSpan().TrimStart('-').IsEmpty)
-                    {
-                        if (previous is null)
-                            throw new InvalidDataException("omm_conf cannot start with separator line ---");
-                        header = new OmmConfHeader(previous.Split('|'));
-                    }
-                    else if (!(header is null))
-                    {
-                        var values = current.Split('|');
-                        var data = new OmmConfEntry(header, values);
-                        var section = AddSection(data.Type);
-                        section.Add(data);
-                    }
-                    if (previous != null )
-                    {
-                        var bytes = Encoding.UTF8.GetBytes(previous);
-                        md5.TransformBlock(bytes, 0, bytes.Length, null, 0);
-                        md5.TransformBlock(LineBreak, 0, LineBreak.Length, null, 0);
-                    }
-                    previous = current;
+                    // new section
+                    header = null;
                 }
-                md5.TransformFinalBlock(HiddenMd5Data, 0, HiddenMd5Data.Length);
-                var checksum = HexEncoding.ByteToHex(md5.Hash);
-                if (previous != checksum)
-                    throw new InvalidDataException("invalid checksum");
+                else if (current.AsSpan().TrimStart('-').IsEmpty)
+                {
+                    if (previous is null)
+                        throw new InvalidDataException("omm_conf cannot start with separator line ---");
+                    header = new OmmConfHeader(previous.Split('|'));
+                }
+                else if (!(header is null))
+                {
+                    var values = current.Split('|');
+                    var data = new OmmConfEntry(header, values);
+                    var section = AddSection(data.Type);
+                    section.Add(data);
+                }
+                if (previous != null )
+                {
+                    var bytes = Encoding.UTF8.GetBytes(previous);
+                    md5.TransformBlock(bytes, 0, bytes.Length, null, 0);
+                    md5.TransformBlock(LineBreak, 0, LineBreak.Length, null, 0);
+                }
+                previous = current;
             }
+            md5.TransformFinalBlock(HiddenMd5Data, 0, HiddenMd5Data.Length);
+            var checksum = HexEncoding.ByteToHex(md5.Hash);
+            if (previous != checksum)
+                throw new InvalidDataException("invalid checksum");
         }
 
         public async Task<IEnumerable<OmmConfEntry>> GetSectionAsync(string section, CancellationToken cancellationToken)
@@ -183,15 +177,15 @@ namespace RfpProxyLib
 
         private List<OmmConfEntry> AddSection(string section)
         {
-            if (!_sections.TryGetValue(section, out var result))
-            {
-                result = new List<OmmConfEntry>();
-                _sections.Add(section, result);
-            }
+            if (_sections.TryGetValue(section, out var result)) return result;
+            
+            result = new List<OmmConfEntry>();
+            _sections.Add(section, result);
             return result;
         }
 
-        private bool _disposed = false;
+        private bool _disposed;
+        
         public void Dispose()
         {
             Dispose(true);

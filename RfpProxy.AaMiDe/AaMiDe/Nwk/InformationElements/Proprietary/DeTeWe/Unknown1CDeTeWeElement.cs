@@ -2,7 +2,7 @@
 using System.IO;
 using System.Text;
 
-namespace RfpProxy.AaMiDe.Nwk.InformationElements.Proprietary.DeTeWe
+namespace RfpProxy.AaMiDe.AaMiDe.Nwk.InformationElements.Proprietary.DeTeWe
 {
     public class Unknown1CDeTeWeElement : DeTeWeElement
     {

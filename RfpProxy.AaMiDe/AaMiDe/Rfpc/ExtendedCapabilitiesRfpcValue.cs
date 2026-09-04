@@ -2,7 +2,7 @@
 using System.Buffers.Binary;
 using System.IO;
 
-namespace RfpProxy.AaMiDe.Rfpc
+namespace RfpProxy.AaMiDe.AaMiDe.Rfpc
 {
     public sealed class ExtendedCapabilitiesRfpcValue : DnmRfpcValue
     {
@@ -56,7 +56,7 @@ namespace RfpProxy.AaMiDe.Rfpc
 
         public override bool HasUnknown => WirelessRelayStations != 0;
 
-        public override ReadOnlyMemory<byte> Raw => base.Raw.Slice(5);
+        public override ReadOnlyMemory<byte> Raw => base.Raw[5..];
 
         public ExtendedCapabilitiesRfpcValue(ReadOnlyMemory<byte> data):base(RfpcKey.ExtendedCapabilities, data)
         {
@@ -67,7 +67,7 @@ namespace RfpProxy.AaMiDe.Rfpc
             MacSuspendResume = (span[1] & 0b0100) != 0;
             IpqServicesSupported = (span[1] & 0b0010) != 0;
             ExtendedFPInfo2 = (span[1] & 0b0001) != 0;
-            Capabilities = (ExtendedHigherLayerCapabilities) (BinaryPrimitives.ReadInt32BigEndian(span.Slice(1)) & 0x7fffff);
+            Capabilities = (ExtendedHigherLayerCapabilities) (BinaryPrimitives.ReadInt32BigEndian(span[1..]) & 0x7fffff);
         }
 
         public override void Log(TextWriter writer)

@@ -3,7 +3,7 @@ using System.Buffers.Binary;
 using System.IO;
 using System.Net;
 
-namespace RfpProxy.AaMiDe.Media
+namespace RfpProxy.AaMiDe.AaMiDe.Media
 {
     public sealed class MediaStatisticsMessage : MediaMessage
     {
@@ -25,19 +25,19 @@ namespace RfpProxy.AaMiDe.Media
 
         public IPAddress RtpIp { get; }
 
-        protected override ReadOnlyMemory<byte> Raw => base.Raw.Slice(34);
+        protected override ReadOnlyMemory<byte> Raw => base.Raw[34..];
 
         public MediaStatisticsMessage(ReadOnlyMemory<byte> data):base(MsgType.MEDIA_STATISTICS, data)
         {
             var span = base.Raw.Span;
             Padding = BinaryPrimitives.ReadUInt16LittleEndian(span);
-            Duration = TimeSpan.FromSeconds(BinaryPrimitives.ReadUInt32LittleEndian(span.Slice(2)));
-            TransmittedPackets = BinaryPrimitives.ReadUInt32LittleEndian(span.Slice(6));
-            TransmittedBytes = BinaryPrimitives.ReadUInt32LittleEndian(span.Slice(10));
-            ReceivedPackets = BinaryPrimitives.ReadUInt32LittleEndian(span.Slice(14));
-            ReceivedBytes = BinaryPrimitives.ReadUInt32LittleEndian(span.Slice(18));
-            LostPackets = BinaryPrimitives.ReadUInt32LittleEndian(span.Slice(22));
-            MaxJitter = BinaryPrimitives.ReadUInt32LittleEndian(span.Slice(26));
+            Duration = TimeSpan.FromSeconds(BinaryPrimitives.ReadUInt32LittleEndian(span[2..]));
+            TransmittedPackets = BinaryPrimitives.ReadUInt32LittleEndian(span[6..]);
+            TransmittedBytes = BinaryPrimitives.ReadUInt32LittleEndian(span[10..]);
+            ReceivedPackets = BinaryPrimitives.ReadUInt32LittleEndian(span[14..]);
+            ReceivedBytes = BinaryPrimitives.ReadUInt32LittleEndian(span[18..]);
+            LostPackets = BinaryPrimitives.ReadUInt32LittleEndian(span[22..]);
+            MaxJitter = BinaryPrimitives.ReadUInt32LittleEndian(span[26..]);
             RtpIp = new IPAddress(span.Slice(30, 4));
         }
 
