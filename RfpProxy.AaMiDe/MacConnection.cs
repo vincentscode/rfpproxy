@@ -1,24 +1,24 @@
-﻿using RfpProxy.AaMiDe.AaMiDe.Mac;
+﻿using System.Diagnostics;
+using RfpProxy.AaMiDe.AaMiDe.Mac;
+using RfpProxyLib;
 
 namespace RfpProxy.AaMiDe
 {
-    public class MacConnection
+    public class MacConnection(RfpConnectionTracker tracker, byte mcei)
     {
-        private readonly RfpConnectionTracker _tracker;
-        public byte MCEI { get; }
+        /// <summary>
+        /// MAC Connection Endpoint Identification
+        /// </summary>
+        public byte MCEI { get; } = mcei;
 
+        /// <summary>
+        /// Portable part MAC IDentity
+        /// </summary>
         public uint PMID { get; private set; }
-
+        
         public NwkReassembler Reassembler { get; private set; }
 
-        public bool IsConnected { get; private set; }
-
-        public MacConnection(RfpConnectionTracker tracker, byte mcei)
-        {
-            _tracker = tracker;
-            MCEI = mcei;
-            IsConnected = false;
-        }
+        public bool IsConnected { get; private set; } = false;
 
         public void Open(MacConIndPayload macConInd)
         {
@@ -26,10 +26,17 @@ namespace RfpProxy.AaMiDe
             Reassembler = new NwkReassembler();
             if (macConInd.Ho)
             {
-                var previous = _tracker.Find(PMID);
+                var previous = tracker.Find(PMID);
                 if (previous != null)
                     Reassembler.CopyFrom(previous.Reassembler);
             }
+            IsConnected = true;
+        }
+        
+        public void Open(MacConExtIndPayload macConExtInd)
+        {
+            PMID = MacConExtIndPayload.TPUI2PMID[macConExtInd.TPUI.ToHex()];
+            Reassembler = new NwkReassembler();
             IsConnected = true;
         }
 
@@ -37,7 +44,12 @@ namespace RfpProxy.AaMiDe
         {
             if (IsConnected)
                 Reassembler.Clear();
-            _tracker.Close(this);
+            tracker.Close(this);
+        }
+
+        public override string ToString()
+        {
+            return $"Connection: MCEI={MCEI}, PMID={PMID}, IsConnected={IsConnected}";
         }
     }
 }

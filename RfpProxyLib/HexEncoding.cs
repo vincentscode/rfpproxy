@@ -30,8 +30,8 @@ namespace RfpProxyLib
         //converts a byte array to a hex string
         public static string ByteToHex(ReadOnlySpan<byte> bytes)
         {
-            StringBuilder s = new StringBuilder(bytes.Length*2);
-            foreach (byte b in bytes)
+            var s = new StringBuilder(bytes.Length*2);
+            foreach (var b in bytes)
                 s.Append(b.ToString("x2"));
             return s.ToString();
         }
@@ -59,14 +59,17 @@ namespace RfpProxyLib
             {
                 return (byte)(x - '0');
             }
-            else if (x <= 'z' && x >= 'a')
+
+            if (x <= 'z' && x >= 'a')
             {
                 return (byte)(x - 'a' + 10);
             }
-            else if (x <= 'Z' && x >= 'A')
+
+            if (x <= 'Z' && x >= 'A')
             {
                 return (byte)(x - 'A' + 10);
             }
+           
             return 0;
         }
 

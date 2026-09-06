@@ -5,6 +5,8 @@
     <TargetFramework>net8.0</TargetFramework>
     <AssemblyName>gigaset</AssemblyName>
     <RootNamespace>RfpProxy.Gigaset</RootNamespace>
+    <Nullable>enable</Nullable>
+    <LangVersion>latest</LangVersion>
   </PropertyGroup>
 
   <ItemGroup>

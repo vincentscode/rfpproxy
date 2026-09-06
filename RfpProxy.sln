@@ -16,6 +16,7 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{A648EB0B-1DA2-4834-88E3-61CAA95982BF}"
 	ProjectSection(SolutionItems) = preProject
 		rfpled.py = rfpled.py
+		run-gigaset-remote.sh = run-gigaset-remote.sh
 	EndProjectSection
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "RfpProxy.Pcap", "RfpProxy.Pcap\RfpProxy.Pcap.csproj", "{4E77C8C0-46EB-4F22-B8FA-20E5538550E6}"

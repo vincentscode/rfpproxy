@@ -1,13 +1,12 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using RfpProxyLib;
 
 namespace RfpProxy.AaMiDe
 {
     public class MacConnectionTracker
     {
-        private readonly  Dictionary<RfpIdentifier, RfpConnectionTracker> _connections = new Dictionary<RfpIdentifier, RfpConnectionTracker>();
-
+        private readonly Dictionary<RfpIdentifier, RfpConnectionTracker> _connections = new();
+        
         public RfpConnectionTracker Get(RfpIdentifier rfp)
         {
             if (!_connections.TryGetValue(rfp, out var tracker))
@@ -15,6 +14,7 @@ namespace RfpProxy.AaMiDe
                 tracker = new RfpConnectionTracker(rfp, this);
                 _connections.Add(rfp, tracker);
             }
+
             return tracker;
         }
 
@@ -25,6 +25,7 @@ namespace RfpProxy.AaMiDe
                 if (connection.TryGetByPMID(pmid, out var result))
                     return result;
             }
+
             return null;
         }
     }

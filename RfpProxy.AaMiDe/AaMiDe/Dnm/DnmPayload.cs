@@ -65,6 +65,10 @@ namespace RfpProxy.AaMiDe.AaMiDe.Dnm
                     return new MacHoInProgressResPayload(data);
                 case DnmType.HoFailedInd:
                     return new MacHoFailedIndPayload(data);
+                case DnmType.MacConExtInd:
+                    var macConExtInd = new MacConExtIndPayload(data);
+                    connection.Open(macConExtInd);
+                    return new MacConExtIndPayload(data);
                 default:
                     return new UnknownDnmPayload(data);
             }
