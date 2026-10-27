@@ -16,6 +16,19 @@ using RfpProxyLib.Messages;
 
 namespace RfpProxy.Gigaset;
 
+public enum ConnectionState
+{
+    Uninitialized,
+    Injecting,
+    Initialized,
+}
+
+public enum InjectingState
+{
+    Inject1,
+    Inject2,
+}
+
 public class GigasetClient(string socket) : ProxyClient(socket)
 {
     private readonly MacConnectionTracker _rfpTracker = new();
@@ -26,6 +39,8 @@ public class GigasetClient(string socket) : ProxyClient(socket)
     private int _messagesSinceCISSReleaseComSeen = -1;
 
     private int _act;
+
+    private readonly Dictionary<string, (ConnectionState, InjectingState)> _tpui2State = [];
     
     protected override async Task OnMessageAsync(MessageDirection direction, uint messageId, RfpIdentifier rfp, Memory<byte> data, CancellationToken cancellationToken)
     {
@@ -50,6 +65,16 @@ public class GigasetClient(string socket) : ProxyClient(socket)
 
         // we are a handler, so we must forward all messages that we do not want to modify as they are
         await WriteAsync(direction, messageId, rfp, data, cancellationToken);
+
+        // TODO: actually ensure that we are only messing with Siemens devices (EMC 0x0002)
+        if (dnm.Payload is LcDataPayload { Payload: NwkMMPayload { Type: NwkMMMessageType.LocateAccept } nwkMmPayload })
+        {
+            var portableIdentity = (NwkIePortableIdentity) nwkMmPayload.InformationElements.Single(x => x is NwkIePortableIdentity);
+            Debug.Assert(portableIdentity.IdentityType == NwkIePortableIdentity.PortableIdentityType.TPUI);
+            Debug.Assert(portableIdentity.TPUIType == NwkIePortableIdentity.TPUITypeCoding.WithoutNumber);
+
+            _tpui2State[portableIdentity.Identity.ToHex()] = (ConnectionState.Injecting, InjectingState.Inject1);
+        }
 
         // custom injections
         try
