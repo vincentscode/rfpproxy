@@ -95,8 +95,8 @@ public class GigasetClient(string socket) : ProxyClient(socket)
                     _act = (_act + 1) % 2;
                     Console.WriteLine("==== MEOW ACT 1 ====");
 
-                    var cissRequestSeqTlv = new SiemensProperietaryCissRequestSeqElement(0xe2);
-                    var displayTlv = new SiemensProperietaryDisplayElement(0x01, "C430@Mitel");
+                    var cissRequestSeqTlv = new SiemensProprietaryCissRequestSeqElement(0xe2);
+                    var displayTlv = new SiemensProprietaryDisplayElement(0x01, "C430@Mitel");
 
                     byte[] notificationTlvData = [
                         0x2, // event notification subtype
@@ -144,8 +144,8 @@ public class GigasetClient(string socket) : ProxyClient(socket)
                     _act = (_act + 1) % 2;
 
                     var dateTime = new DateTime(new DateOnly(2000, 1, 1), new TimeOnly(13, 37, 00));
-                    var timeDateTlv = new SiemensProperietaryTimeDateElement(dateTime, 0x03, 0x00, 0x04);
-                    var cissRequestSeqTlv = new SiemensProperietaryCissRequestSeqElement(0xe3);
+                    var timeDateTlv = new SiemensProprietaryTimeDateElement(dateTime, 0x03, 0x00, 0x04);
+                    var cissRequestSeqTlv = new SiemensProprietaryCissRequestSeqElement(0xe3);
 
                     var options = new HeaderOptions { NR = 0b000, NS = 0b001 };
                     await SendSiemensFacilityMessage([timeDateTlv, cissRequestSeqTlv], rfp, dnm.MCEI, options, cancellationToken);

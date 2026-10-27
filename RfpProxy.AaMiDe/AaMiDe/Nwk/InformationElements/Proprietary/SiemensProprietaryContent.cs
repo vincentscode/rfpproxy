@@ -8,10 +8,10 @@ using RfpProxyLib;
 
 namespace RfpProxy.AaMiDe.AaMiDe.Nwk.InformationElements.Proprietary;
 
-public class SiemensProperietaryCissRequestSeqElement(byte sequenceNumber)
+public class SiemensProprietaryCissRequestSeqElement(byte sequenceNumber)
     : SiemensProprietaryContent.SiemensElement(SiemensProprietaryContent.SiemensType.CissRequestSeq, ReadOnlyMemory<byte>.Empty)
 {
-    public SiemensProperietaryCissRequestSeqElement(ReadOnlyMemory<byte> data) : this(data.Span[0])
+    public SiemensProprietaryCissRequestSeqElement(ReadOnlyMemory<byte> data) : this(data.Span[0])
     {
     }
 
@@ -31,13 +31,14 @@ public class SiemensProperietaryCissRequestSeqElement(byte sequenceNumber)
         ];
     }
 }
-public class SiemensProperietaryDisplayElement(byte handsetNumber, byte[] displayString)
+
+public class SiemensProprietaryDisplayElement(byte handsetNumber, byte[] displayString)
     : SiemensProprietaryContent.SiemensElement(SiemensProprietaryContent.SiemensType.Display, ReadOnlyMemory<byte>.Empty)
 {
     public byte HandsetNumber { get; } = handsetNumber;
     public byte[] DisplayString { get; } = displayString;
 
-    public SiemensProperietaryDisplayElement(byte handsetNumber, string displayString) : this(handsetNumber, [.. displayString.Select(c => (byte)c)])
+    public SiemensProprietaryDisplayElement(byte handsetNumber, string displayString) : this(handsetNumber, [.. displayString.Select(c => (byte)c)])
     {
     }
 
@@ -57,7 +58,7 @@ public class SiemensProperietaryDisplayElement(byte handsetNumber, byte[] displa
     }
 }
 
-public class SiemensProperietaryTimeDateElement(byte unknown1, byte dayBCD, byte monthBCD, byte yearBCD, byte unknown2, byte unknown3, byte hourBCD, byte minuteBCD, byte secondBCD)
+public class SiemensProprietaryTimeDateElement(byte unknown1, byte dayBCD, byte monthBCD, byte yearBCD, byte unknown2, byte unknown3, byte hourBCD, byte minuteBCD, byte secondBCD)
     : SiemensProprietaryContent.SiemensElement(SiemensProprietaryContent.SiemensType.TimeDate,
         ReadOnlyMemory<byte>.Empty)
 {
@@ -71,7 +72,7 @@ public class SiemensProperietaryTimeDateElement(byte unknown1, byte dayBCD, byte
     public byte MinuteBCD { get; } = minuteBCD;
     public byte SecondBCD { get; } = secondBCD;
 
-    public SiemensProperietaryTimeDateElement(DateTime dateTime, byte unk1, byte unk2, byte unk3)
+    public SiemensProprietaryTimeDateElement(DateTime dateTime, byte unk1, byte unk2, byte unk3)
         : this(unk1, ToBCD(dateTime.Day), ToBCD(dateTime.Month), ToBCD(dateTime.Year - 2000), unk2, unk3, ToBCD(dateTime.Hour), ToBCD(dateTime.Minute), ToBCD(dateTime.Second))
     {
     }
