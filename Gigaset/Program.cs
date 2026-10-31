@@ -9,7 +9,7 @@ namespace RfpProxy.Gigaset;
 public static class Program
 {
     private static readonly CancellationTokenSource CancellationTokenSource = new();
-    private static GigasetClient _client;
+    private static GigasetClient? _client;
 
     public static async Task Main(string[] args)
     {
@@ -56,9 +56,11 @@ public static class Program
                 _client.Stop();
             };
 
-            await _client.AddHandlerAsync(0, "000000000000", "000000000000", "0301", "ffff", CancellationTokenSource.Token)
+            await _client
+                .AddHandlerAsync(0, "000000000000", "000000000000", "0301", "ffff", CancellationTokenSource.Token)
                 .ConfigureAwait(false);
-            await _client.RunAsync(CancellationTokenSource.Token);
+            await _client
+                .RunAsync(CancellationTokenSource.Token);
         }
         catch (OperationCanceledException)
         {

@@ -1,2 +1,7 @@
+root = true
+
+[*]
+max_line_length = 256
+
 [*.cs]
 dotnet_diagnostic.CA2208.severity = silent
