@@ -5,6 +5,9 @@
         FromOmm = 0,
         ToRfp = FromOmm,
         FromRfp = 1,
-        ToOmm = FromRfp
+        ToOmm = FromRfp,
+        
+        FromPp = FromRfp,
+        ToPp = ToRfp,
     }
 }

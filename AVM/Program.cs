@@ -67,7 +67,7 @@ public static class Program
 
 public class ReplaceSignalClient : ProxyClient
 {
-    private static readonly HashSet<ushort> EMCs = new HashSet<ushort>
+    private static readonly HashSet<ushort> EMCs = new()
     {
         04563,
         09615,

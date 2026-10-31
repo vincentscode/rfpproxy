@@ -4,4 +4,6 @@
 	<s:String x:Key="/Default/CodeStyle/Naming/CSharpNaming/Abbreviations/=MCEI/@EntryIndexedValue">MCEI</s:String>
 	<s:String x:Key="/Default/CodeStyle/Naming/CSharpNaming/Abbreviations/=PMID/@EntryIndexedValue">PMID</s:String>
 	<s:String x:Key="/Default/CodeStyle/Naming/CSharpNaming/Abbreviations/=PP/@EntryIndexedValue">PP</s:String>
-	<s:Boolean x:Key="/Default/UserDictionary/Words/=Gigaset/@EntryIndexedValue">True</s:Boolean></wpf:ResourceDictionary>
+	<s:String x:Key="/Default/CodeStyle/Naming/CSharpNaming/Abbreviations/=TPUI/@EntryIndexedValue">TPUI</s:String>
+	<s:Boolean x:Key="/Default/UserDictionary/Words/=Gigaset/@EntryIndexedValue">True</s:Boolean>
+	<s:Boolean x:Key="/Default/UserDictionary/Words/=TPUI/@EntryIndexedValue">True</s:Boolean></wpf:ResourceDictionary>

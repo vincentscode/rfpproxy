@@ -16,17 +16,106 @@ using RfpProxyLib.Messages;
 
 namespace RfpProxy.Gigaset;
 
-public enum ConnectionState
+public abstract class HandsetState
 {
-    Uninitialized,
-    Injecting,
-    Initialized,
+    public abstract Task OnEnter(CancellationToken cancellationToken);
+    public abstract Task<bool> ProcessMessage(DnmMessage dnm, CancellationToken cancellationToken);
 }
 
-public enum InjectingState
+public sealed class InitialHandsetState : HandsetState
 {
-    Inject1,
-    Inject2,
+    private int _messagesSinceTemporaryIdentityAssignAckSeen = -1;
+    
+    public static readonly InitialHandsetState Instance = new();
+
+    private InitialHandsetState()
+    {
+    }
+
+    public override Task OnEnter(CancellationToken cancellationToken)
+    {
+        return Task.CompletedTask;
+    }
+
+    public override Task<bool> ProcessMessage(DnmMessage dnm, CancellationToken cancellationToken)
+    {
+        var isTemporaryIdentityAssignAck = dnm.Payload is LcDataPayload { Payload: NwkMMPayload { Type: NwkMMMessageType.TemporaryIdentityAssignAck } };
+        if (isTemporaryIdentityAssignAck)
+        {
+            _messagesSinceTemporaryIdentityAssignAckSeen = 0;
+        }
+
+        if (!isTemporaryIdentityAssignAck && _messagesSinceTemporaryIdentityAssignAckSeen >= 0)
+        {
+            _messagesSinceTemporaryIdentityAssignAckSeen += 1;
+            if (_messagesSinceTemporaryIdentityAssignAckSeen == 1)
+            {
+                var cissRequestSeqTlv = new SiemensProprietaryCissRequestSeqElement(0xe2);
+                var displayTlv = new SiemensProprietaryDisplayElement(0x01, "C430@Mitel");
+
+                byte[] notificationTlvData =
+                [
+                    0x2, // event notification subtype
+                    14, // length of subtype
+                    0x1, 0x0, // answering machine messages notifications (0x1), count
+                    0x2, 0x0, // unknown (0x2), count
+                    0x3, 0x0, // waiting sms (0x3), count
+                    0x4, 0x0, // unknown (0x4), count
+                    0x5, 0x0, // missed calls (0x5), count
+                ];
+                var notificationTlv = new SiemensProprietaryContent.SiemensElement(
+                    SiemensProprietaryContent.SiemensType.Unnamed,
+                    notificationTlvData
+                );
+
+                // unknown subtype from https://osmocom.org/projects/dect/wiki/Trace_access_rights_gigaseta140
+                byte[] testTlvData =
+                [
+                    0x3, // subtype
+                    0, // length of subtype
+                ];
+                var testTlv = new SiemensProprietaryContent.SiemensElement(
+                    SiemensProprietaryContent.SiemensType.Unnamed,
+                    notificationTlvData
+                );
+
+                var options = new HeaderOptions { NR = 0b000, NS = 0b000 };
+
+                await SendSiemensFacilityMessage([displayTlv, cissRequestSeqTlv], rfp, dnm.MCEI, options,
+                    cancellationToken);
+            }
+        }
+
+        return Task.CompletedTask;
+    }
+}
+
+public class HandsetStateMachine
+{
+    private HandsetState _currentState;
+
+    private HandsetStateMachine()
+    {
+        _currentState = null!;
+    }
+
+    public static async Task<HandsetStateMachine> Create(HandsetState initialState, CancellationToken cancellationToken)
+    {
+        var stateMachine = new HandsetStateMachine();
+        await stateMachine.TransitionTo(initialState, cancellationToken);
+        return stateMachine;
+    }
+
+    public Task<bool> ProcessMessage(DnmMessage dnm, CancellationToken cancellationToken)
+    {
+        return _currentState.ProcessMessage(dnm, cancellationToken);
+    }
+
+    public async Task TransitionTo(HandsetState newState, CancellationToken cancellationToken)
+    {
+        _currentState = newState;
+        await _currentState.OnEnter(cancellationToken);
+    }
 }
 
 public class GigasetClient(string socket) : ProxyClient(socket)
@@ -35,12 +124,11 @@ public class GigasetClient(string socket) : ProxyClient(socket)
     private readonly MacConnectionTracker _ommTracker = new();
 
     // TODO: this is terrible and only works for a single device, but we can fix that with the connection PMID
-    private int _messagesSinceTemporaryIdentityAssignAckSeen = -1;
     private int _messagesSinceCISSReleaseComSeen = -1;
 
     private int _act;
 
-    private readonly Dictionary<string, (ConnectionState, InjectingState)> _tpui2State = [];
+    private readonly Dictionary<uint, HandsetStateMachine> _stateMachinesByPMID = new();
     
     protected override async Task OnMessageAsync(MessageDirection direction, uint messageId, RfpIdentifier rfp, Memory<byte> data, CancellationToken cancellationToken)
     {
@@ -53,8 +141,8 @@ public class GigasetClient(string socket) : ProxyClient(socket)
         }
 
         // log and get the message
-        var x = HandleDefaultsAndGetMessage(direction, messageId, rfp, data, cancellationToken);
-        if (x is not var (dnm, connection))
+        var dnmConnPair = HandleDefaultsAndGetMessage(direction, rfp, data);
+        if (dnmConnPair is not var (dnm, connection))
         {
             // we are a handler, so we must forward all messages that we do not want to modify as they are
             await WriteAsync(direction, messageId, rfp, data, cancellationToken);
@@ -63,8 +151,21 @@ public class GigasetClient(string socket) : ProxyClient(socket)
 
         Console.WriteLine(" > {0}", connection);
 
-        // we are a handler, so we must forward all messages that we do not want to modify as they are
-        await WriteAsync(direction, messageId, rfp, data, cancellationToken);
+        // get the state machine for the given portable device
+        // TODO: do we need to incorporate MCEI as well?
+        var stateMachine = _stateMachinesByPMID.GetValueOrDefault(connection.PMID);
+        if (stateMachine is null)
+        {
+            stateMachine = _stateMachinesByPMID[connection.PMID] = await HandsetStateMachine.Create(InitialHandsetState.Instance, cancellationToken);
+        }
+
+        // let the state machine handle the message or forward it ourselves
+        var handled = await stateMachine.ProcessMessage(dnm, cancellationToken);
+        if (!handled)
+        {
+            // we are a handler, so we must forward all messages that we do not want to modify as they are
+            await WriteAsync(direction, messageId, rfp, data, cancellationToken);
+        }
 
         // TODO: actually ensure that we are only messing with Siemens devices (EMC 0x0002)
         if (dnm.Payload is LcDataPayload { Payload: NwkMMPayload { Type: NwkMMMessageType.LocateAccept } nwkMmPayload })
@@ -73,60 +174,11 @@ public class GigasetClient(string socket) : ProxyClient(socket)
             Debug.Assert(portableIdentity.IdentityType == NwkIePortableIdentity.PortableIdentityType.TPUI);
             Debug.Assert(portableIdentity.TPUIType == NwkIePortableIdentity.TPUITypeCoding.WithoutNumber);
 
-            _tpui2State[portableIdentity.Identity.ToHex()] = (ConnectionState.Injecting, InjectingState.Inject1);
         }
 
         // custom injections
         try
         {
-            var isTemporaryIdentityAssignAck = dnm.Payload is LcDataPayload { Payload: NwkMMPayload { Type: NwkMMMessageType.TemporaryIdentityAssignAck } };
-            if (isTemporaryIdentityAssignAck)
-            {
-                Console.WriteLine("==== MEOW OBSERVE 1 ====");
-                _messagesSinceTemporaryIdentityAssignAckSeen = 0;
-            }
-            
-            // TODO: everything about this is terrible (act exactly 1 after TemporaryIdentityAssignAck)
-            if (!isTemporaryIdentityAssignAck && _messagesSinceTemporaryIdentityAssignAckSeen >= 0)
-            {
-                _messagesSinceTemporaryIdentityAssignAckSeen += 1;
-                if (_messagesSinceTemporaryIdentityAssignAckSeen == 1 && _act == 0)
-                {
-                    _act = (_act + 1) % 2;
-                    Console.WriteLine("==== MEOW ACT 1 ====");
-
-                    var cissRequestSeqTlv = new SiemensProprietaryCissRequestSeqElement(0xe2);
-                    var displayTlv = new SiemensProprietaryDisplayElement(0x01, "C430@Mitel");
-
-                    byte[] notificationTlvData = [
-                        0x2, // event notification subtype
-                        14, // length of subtype
-                        0x1, 0x0, // answering machine messages notifications (0x1), count
-                        0x2, 0x0, // (ignored by gigaset) (0x2), count
-                        0x3, 0x0, // waiting sms (0x3), count
-                        0x4, 0x0, // (ignored by gigaset) (0x4), count
-                        0x5, 0x0, // missed calls (0x5), count
-                    ];
-                    var notificationTlv = new SiemensProprietaryContent.SiemensElement(
-                        SiemensProprietaryContent.SiemensType.Unnamed,
-                        notificationTlvData
-                    );
-
-                    // unknown subtype from https://osmocom.org/projects/dect/wiki/Trace_access_rights_gigaseta140
-                    byte[] testTlvData = [
-                        0x3, // subtype
-                        0, // length of subtype
-                    ];
-                    var testTlv = new SiemensProprietaryContent.SiemensElement(
-                        SiemensProprietaryContent.SiemensType.Unnamed,
-                        notificationTlvData
-                    );
-
-                    var options = new HeaderOptions { NR = 0b000, NS = 0b000 };
-                    await SendSiemensFacilityMessage([displayTlv, cissRequestSeqTlv], rfp, dnm.MCEI, options, cancellationToken);
-                }
-            }
-            
             var isCISSReleaseCom = dnm.Payload is LcDataPayload { Payload: NwkCISSPayload { Type: NwkCISSMessageType.CISSReleaseCom } };
             if (isCISSReleaseCom)
             {
@@ -151,7 +203,7 @@ public class GigasetClient(string socket) : ProxyClient(socket)
                     await SendSiemensFacilityMessage([timeDateTlv, cissRequestSeqTlv], rfp, dnm.MCEI, options, cancellationToken);
                 }
             }
-                
+
             // TODO: after sending our FACILITYs we get a CISS connection from the PP, handle the ACK properly
         }
         catch (Exception ex)
@@ -249,7 +301,7 @@ public class GigasetClient(string socket) : ProxyClient(socket)
         await WriteAsync(MessageDirection.FromOmm, 0, rfp, newData.ToArray(), cancellationToken);
     }
 
-    private (DnmMessage, MacConnection)? HandleDefaultsAndGetMessage(MessageDirection direction, uint messageId, RfpIdentifier rfp, Memory<byte> data, CancellationToken cancellationToken)
+    private (DnmMessage, MacConnection)? HandleDefaultsAndGetMessage(MessageDirection direction, RfpIdentifier rfp, Memory<byte> data)
     {
         DnmMessage dnm;
         MacConnection connection;
@@ -273,32 +325,31 @@ public class GigasetClient(string socket) : ProxyClient(socket)
             dnm.Log(Console.Out, true);
             Console.WriteLine();
 
-            // track connections (copied from RfpProxy.Log, unsure why we do this) - i think this is basically the reverse direction we have to maintain manually
+            // track connections
             var otherMacConnectionTracker = direction == MessageDirection.FromOmm ? _rfpTracker : _ommTracker;
             var rfpOtherMacConnectionTracker = otherMacConnectionTracker.Get(rfp);
-            if (dnm.Payload is MacConIndPayload macConInd)
+            switch (dnm.Payload)
             {
-                rfpOtherMacConnectionTracker.Get(dnm.MCEI).Open(macConInd);
-            }
+                case MacConIndPayload macConInd:
+                    rfpOtherMacConnectionTracker.Get(dnm.MCEI).Open(macConInd);
+                    break;
+                case MacConExtIndPayload macConExtInd:
+                    Console.WriteLine("TPUI({0}) -> PMID({1})", macConExtInd.TPUI.ToHex(), MacConExtIndPayload.TPUI2PMID[macConExtInd.TPUI.ToHex()]);
+                    rfpOtherMacConnectionTracker.Get(dnm.MCEI).Open(macConExtInd);
+                    break;
+                case LcDataPayload { Payload: NwkMMPayload { Type: NwkMMMessageType.LocateAccept } nwkMmPayload }:
+                {
+                    var portableIdentity = (NwkIePortableIdentity) nwkMmPayload.InformationElements.Single(x => x is NwkIePortableIdentity);
+                    Debug.Assert(portableIdentity.IdentityType == NwkIePortableIdentity.PortableIdentityType.TPUI);
+                    Debug.Assert(portableIdentity.TPUIType == NwkIePortableIdentity.TPUITypeCoding.WithoutNumber);
 
-            if (dnm.Payload is MacConExtIndPayload macConExtInd)
-            {
-                Console.WriteLine("MROOOOOOOW TPUI({0}) -> PMID({1})", macConExtInd.TPUI.ToHex(), MacConExtIndPayload.TPUI2PMID[macConExtInd.TPUI.ToHex()]);
-                rfpOtherMacConnectionTracker.Get(dnm.MCEI).Open(macConExtInd);
-            }
+                    Console.WriteLine("Setting TPUI for connection:");
+                    Console.WriteLine("Identity (TPUI): {0}", portableIdentity.Identity.ToArray().ToHex());
+                    Console.WriteLine("PMID for MCEI: {0}", rfpOtherMacConnectionTracker.Get(dnm.MCEI).PMID);
 
-            if (dnm.Payload is LcDataPayload { Payload: NwkMMPayload { Type: NwkMMMessageType.LocateAccept } nwkMmPayload })
-            {
-                var portableIdentity = (NwkIePortableIdentity) nwkMmPayload.InformationElements.Single(x => x is NwkIePortableIdentity);
-                Debug.Assert(portableIdentity.IdentityType == NwkIePortableIdentity.PortableIdentityType.TPUI);
-                Debug.Assert(portableIdentity.TPUIType == NwkIePortableIdentity.TPUITypeCoding.WithoutNumber);
-
-                Console.WriteLine("====== MEOOOOOOOOOOOOOOOW");
-                Console.WriteLine("Setting TPUI for connection");
-                Console.WriteLine(portableIdentity.Identity.ToArray().ToHex());
-                Console.WriteLine(rfpOtherMacConnectionTracker.Get(dnm.MCEI).PMID);
-
-                MacConExtIndPayload.TPUI2PMID[portableIdentity.Identity.ToHex()] = rfpOtherMacConnectionTracker.Get(dnm.MCEI).PMID;
+                    MacConExtIndPayload.TPUI2PMID[portableIdentity.Identity.ToHex()] = rfpOtherMacConnectionTracker.Get(dnm.MCEI).PMID;
+                    break;
+                }
             }
 
             if (dnm.DnmType is DnmType.MacDisInd or DnmType.MacDisReq)
