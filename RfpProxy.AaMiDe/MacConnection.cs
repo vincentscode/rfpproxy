@@ -1,4 +1,6 @@
-﻿using System.Diagnostics;
+﻿using System;
+using System.Collections.Generic;
+using System.Diagnostics;
 using RfpProxy.AaMiDe.AaMiDe.Mac;
 using RfpProxyLib;
 
@@ -15,13 +17,14 @@ namespace RfpProxy.AaMiDe
         /// Portable part MAC IDentity
         /// </summary>
         public uint PMID { get; private set; }
-        
+
         public NwkReassembler Reassembler { get; private set; }
 
         public bool IsConnected { get; private set; } = false;
 
         public void Open(MacConIndPayload macConInd)
         {
+            Console.WriteLine($"{DateTimeOffset.Now:HH:mm:ss.fff} [MacConnection] Open(MacConIndPayload(PMID={macConInd.PMID}))");
             PMID = macConInd.PMID;
             Reassembler = new NwkReassembler();
             if (macConInd.Ho)
@@ -35,7 +38,8 @@ namespace RfpProxy.AaMiDe
         
         public void Open(MacConExtIndPayload macConExtInd)
         {
-            PMID = MacConExtIndPayload.TPUI2PMID[macConExtInd.TPUI.ToHex()];
+            Console.WriteLine($"{DateTimeOffset.Now:HH:mm:ss.fff} [MacConnection] Open(MacConExtIndPayload(TPUI={macConExtInd.TPUI}))");
+            PMID = MacConExtIndPayload.TPUI2PMID.GetValueOrDefault(macConExtInd.TPUI.ToHex());
             Reassembler = new NwkReassembler();
             IsConnected = true;
         }

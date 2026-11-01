@@ -10,6 +10,7 @@ using RfpProxy.AaMiDe.AaMiDe.Dnm;
 using RfpProxy.AaMiDe.AaMiDe.Mac;
 using RfpProxy.AaMiDe.AaMiDe.Nwk;
 using RfpProxy.AaMiDe.AaMiDe.Nwk.InformationElements;
+using RfpProxy.Gigaset.Helpers;
 using RfpProxy.Gigaset.States;
 using RfpProxyLib;
 using RfpProxyLib.Messages;
@@ -33,12 +34,44 @@ public class GigasetClient(string socket) : ProxyClient(socket)
             await WriteAsync(direction, messageId, rfp, data, cancellationToken);
             return;
         }
+
+        // TODO: this seems hacky and is only necessary for disconnects since we seem to throw away the PMID then
+        if (connection.PMID == 0)
+        {
+            Console.Write($"{DateTimeOffset.Now:HH:mm:ss.fff} [GigasetClient] ");
+            Console.ForegroundColor = ConsoleColor.Yellow;
+            Console.WriteLine("Not processing message with zero PMID");
+            Console.ResetColor();
+            
+            // so we just forward it as is
+            await WriteAsync(direction, messageId, rfp, data, cancellationToken);
+            return;
+        }
     
         // get or create the state machine for the given pp
         var stateMachine = _stateMachinesByPMID.GetValueOrDefault(connection.PMID);
         if (stateMachine is null)
         {
-            stateMachine = _stateMachinesByPMID[connection.PMID] = await HandsetStateMachine.Create(psm => new InitialHandsetState(psm), this, cancellationToken);
+            Console.WriteLine($"{DateTimeOffset.Now:HH:mm:ss.fff} [GigasetClient] Creating new state machine for PMID: {0}", connection.PMID);
+            stateMachine = _stateMachinesByPMID[connection.PMID] = await HandsetStateMachine.Create(
+                psm => new InitialHandsetState(psm),
+                this,
+                connection.PMID,
+                cancellationToken
+            );
+        }
+        
+        // dispose the state machine if the pp detaches instead of processing further
+        // TODO: this currently does not work, since the PMID always seems to be 0 when detaching? or something like that?
+        if (dnm.Payload is LcDataPayload { Payload: NwkMMPayload { Type: NwkMMMessageType.Detach } })
+        {
+            Console.WriteLine($"{DateTimeOffset.Now:HH:mm:ss.fff} [GigasetClient] Disposing state machine for PMID: {0}", connection.PMID);
+            await stateMachine.DisposeAsync();
+            _stateMachinesByPMID.Remove(connection.PMID);
+            
+            // we still need to forward the message
+            await WriteAsync(direction, messageId, rfp, data, cancellationToken);
+            return;
         }
 
         // let the state machine handle the message
@@ -77,12 +110,17 @@ public class GigasetClient(string socket) : ProxyClient(socket)
             dnm = dnmMessage;
             connection = rfpMacConnectionTracker.Get(dnm.MCEI);
 
-            Console.ForegroundColor = direction == MessageDirection.FromOmm ? ConsoleColor.Blue : ConsoleColor.Green;
-            Console.Write($"{fromPrefix} ");
-            Console.ResetColor();
+            const bool printNonNwk = true;
+            if (dnm.IsNonEmptyNwkMessage() || printNonNwk)
+            {
+                Console.Write($"{DateTimeOffset.Now:HH:mm:ss.fff} [GigasetClient] ");
+                Console.ForegroundColor = direction == MessageDirection.FromOmm ? ConsoleColor.Blue : ConsoleColor.Green;
+                Console.Write($"{fromPrefix} ");
+                Console.ResetColor();
 
-            dnm.Log(Console.Out, true);
-            Console.WriteLine();
+                dnm.Log(Console.Out, true);
+                Console.WriteLine();
+            }
 
             // track connections
             var otherMacConnectionTracker = direction == MessageDirection.FromOmm ? _rfpTracker : _ommTracker;
@@ -93,7 +131,7 @@ public class GigasetClient(string socket) : ProxyClient(socket)
                     rfpOtherMacConnectionTracker.Get(dnm.MCEI).Open(macConInd);
                     break;
                 case MacConExtIndPayload macConExtInd:
-                    Console.WriteLine("TPUI({0}) -> PMID({1})", macConExtInd.TPUI.ToHex(), MacConExtIndPayload.TPUI2PMID[macConExtInd.TPUI.ToHex()]);
+                    Console.WriteLine("TPUI({0}) -> PMID({1})", macConExtInd.TPUI.ToHex(), MacConExtIndPayload.TPUI2PMID.GetValueOrDefault(macConExtInd.TPUI.ToHex()));
                     rfpOtherMacConnectionTracker.Get(dnm.MCEI).Open(macConExtInd);
                     break;
                 case LcDataPayload { Payload: NwkMMPayload { Type: NwkMMMessageType.LocateAccept } nwkMmPayload }:

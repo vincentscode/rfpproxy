@@ -158,6 +158,10 @@ public class ClientConnection
             }
             client.Complete();
         }
+        catch (TimeoutException)
+        {
+            Console.WriteLine("TimeoutException in ClientConnection.ReadPipeAsync");
+        }
         catch (OperationCanceledException ex)
         {
             Console.WriteLine("cancelled in ClientConnection.ReadPipeAsync");
@@ -206,8 +210,7 @@ public class ClientConnection
 
     public async Task<OmmMessage> HandleAsync(OmmMessage message, CancellationToken cancellationToken)
     {
-        if (!_pending.TryAdd(message.MessageId, message))
-            throw new ArgumentException("message id must be unique", nameof(message));
+        if (!_pending.TryAdd(message.MessageId, message))  throw new ArgumentException("message id must be unique", nameof(message));
         await SendInternalAsync(message, cancellationToken).ConfigureAwait(false);
         var result = await message.WaitForReplyAsync(cancellationToken).ConfigureAwait(false);
         _pending.TryRemove(message.MessageId, out _);

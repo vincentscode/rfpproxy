@@ -5,34 +5,49 @@ using RfpProxy.AaMiDe.AaMiDe.Dnm;
 
 namespace RfpProxy.Gigaset;
 
-public class HandsetStateMachine
+public sealed class HandsetStateMachine : IAsyncDisposable
 {
     public GigasetClient GigasetClient { get; }
-    
-    private HandsetState _currentState;
+    public readonly uint ConnectionPMID;
 
-    private HandsetStateMachine(GigasetClient gigasetClient)
+    private HandsetState? _currentState;
+
+    private HandsetStateMachine(GigasetClient gigasetClient, uint connectionPMID)
     {
         GigasetClient = gigasetClient;
-        
+        ConnectionPMID = connectionPMID;
         _currentState = null!;
     }
 
-    public static async Task<HandsetStateMachine> Create(Func<HandsetStateMachine, HandsetState> initialStateFactory, GigasetClient gigasetClient, CancellationToken cancellationToken)
+    public static async Task<HandsetStateMachine> Create(Func<HandsetStateMachine, HandsetState> initialStateFactory, GigasetClient gigasetClient, uint connectionPMID, CancellationToken cancellationToken)
     {
-        var stateMachine = new HandsetStateMachine(gigasetClient);
+        Console.WriteLine($"{DateTimeOffset.Now:HH:mm:ss.fff} [HandsetStateMachine({connectionPMID})] Create");
+        var stateMachine = new HandsetStateMachine(gigasetClient, connectionPMID);
         await stateMachine.TransitionTo(initialStateFactory.Invoke(stateMachine), cancellationToken);
         return stateMachine;
     }
 
     public Task ProcessMessage(DnmMessage dnm, MessageContext messageContext, CancellationToken cancellationToken)
     {
-        return _currentState.ProcessMessage(dnm, messageContext, cancellationToken);
+        return _currentState!.ProcessMessage(dnm, messageContext, cancellationToken);
     }
 
     public async Task TransitionTo(HandsetState newState, CancellationToken cancellationToken)
     {
+        Console.WriteLine($"{DateTimeOffset.Now:HH:mm:ss.fff} [HandsetStateMachine({ConnectionPMID})] TransitionTo: {newState}");
+        if (_currentState != null)
+        {
+            await _currentState.DisposeAsync();
+        }
         _currentState = newState;
         await _currentState.OnEnter(cancellationToken);
+    }
+
+    public async ValueTask DisposeAsync()
+    {
+        if (_currentState != null)
+        {
+            await _currentState.DisposeAsync();
+        }
     }
 }

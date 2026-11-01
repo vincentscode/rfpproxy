@@ -167,13 +167,16 @@ public class RfpProxy(int listenPort, string ommHost, int ommPort, string socket
             }
             catch(Exception ex)
             {
-                Console.WriteLine(ex.Message);
+                Console.WriteLine("exception in OnClientMessageAsync: {0}", ex.Message);
                 _subscriptions.TryRemove(subscription, out _);
                 try
                 {
                     subscription.Cancel();
+                    Console.WriteLine("subscription removed!");
                 }
-                catch(ObjectDisposedException){}
+                catch (ObjectDisposedException)
+                {
+                }
             }
         }
         if (!data.IsEmpty)
@@ -191,13 +194,16 @@ public class RfpProxy(int listenPort, string ommHost, int ommPort, string socket
             }
             catch(Exception ex)
             {
-                Console.WriteLine(ex.Message);
+                Console.WriteLine("exception in OnServerMessageAsync: {0}", ex.Message);
                 _subscriptions.TryRemove(subscription, out _);
                 try
                 {
                     subscription.Cancel();
+                    Console.WriteLine("subscription removed!");
                 }
-                catch(ObjectDisposedException){}
+                catch (ObjectDisposedException)
+                {
+                }
             }
         }
         if (!data.IsEmpty)

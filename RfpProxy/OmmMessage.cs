@@ -10,7 +10,7 @@ namespace RfpProxy;
 
 public class OmmMessage
 {
-    private readonly SemaphoreSlim _receivedReply = new SemaphoreSlim(0,1);
+    private readonly SemaphoreSlim _receivedReply = new(0,1);
     private OmmMessage _reply;
 
     public OmmMessage(MessageDirection direction, uint messageId, RfpIdentifier rfp, ReadOnlyMemory<byte> message)
@@ -42,7 +42,7 @@ public class OmmMessage
 
     public OmmMessage Reply
     {
-        get { return _reply; }
+        get => _reply;
         set
         {
             _reply = value;
@@ -65,10 +65,17 @@ public class OmmMessage
 
     public async Task<OmmMessage> WaitForReplyAsync(CancellationToken cancellationToken)
     {
-        var replied = await _receivedReply.WaitAsync(TimeSpan.FromMilliseconds(250), cancellationToken)
+        // TODO: this was 100ms originally and should probably be restored to that
+        const int timeoutMilliseconds = 500;
+        var replied = await _receivedReply
+            .WaitAsync(TimeSpan.FromMilliseconds(timeoutMilliseconds), cancellationToken)
             .ConfigureAwait(false);
-        if (!replied) 
-            throw new TimeoutException("client did not answer within 250ms");
+        
+        if (!replied)
+        {
+            throw new TimeoutException($"client did not answer within {timeoutMilliseconds}ms");
+        }
+        
         return _reply;
     }
 }
