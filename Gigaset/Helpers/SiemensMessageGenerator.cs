@@ -91,7 +91,7 @@ public static class SiemensMessageGenerator
         return newData;
     }
     
-    private sealed record HeaderOptions
+    public sealed record HeaderOptions
     {
         /// <summary>
         /// N(S) field, 3 bits inside the control field of the DLC frame
