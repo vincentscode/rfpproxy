@@ -95,6 +95,9 @@ public class GigasetClient(string socket) : ProxyClient(socket)
             return null;
         }
         
+        // TODO: fix connection identity tracking, establish a constant identity for a given connection (from LocateRequest to Detach, currently breaks on re-establishment after some time, probably also deal with leaving without sending a Detach)
+        // TODO: track N(R) / N(S) etc. properly instead of just guesstimating values for that everywhere
+        
         DnmMessage dnm;
         MacConnection connection;
         try
